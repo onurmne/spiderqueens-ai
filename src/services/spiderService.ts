@@ -16,13 +16,6 @@ import gwenCardPic from "../assets/images/gwen_cosplay_card_1785866623877.jpg";
 import silkCardPic from "../assets/images/silk_cosplay_card_1785866637691.jpg";
 import venomCardPic from "../assets/images/venom_cosplay_card_1785866653231.jpg";
 
-// Standalone UUID format validation helper to prevent minification scope loss
-const isValidUUID = (id: string): boolean => {
-  if (!id || typeof id !== "string") return false;
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
-};
-
 // Default Initial Seed Competition (Monthly)
 export const CURRENT_COMPETITION: Competition = {
   id: "comp-month-8",
@@ -233,6 +226,13 @@ class SpiderService {
     this.loadInitialData();
   }
 
+  // Sınıf içi metot olarak tanımlandı, böylece derleyici scope hatası (jn is not a function) asla oluşmaz.
+  private checkValidUUID(id: string): boolean {
+    if (!id || typeof id !== "string") return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  }
+
   private async loadInitialData() {
     if (typeof localStorage === "undefined") return;
 
@@ -385,7 +385,7 @@ class SpiderService {
   }
 
   private async ensureSupabaseProfile(userId: string) {
-    if (!isSupabaseConfigured || !isValidUUID(userId)) return;
+    if (!isSupabaseConfigured || !this.checkValidUUID(userId)) return;
     try {
       const { data } = await supabase.from('profiles').select('id').eq('id', userId).limit(1);
       if (!data || data.length === 0) {
@@ -430,7 +430,7 @@ class SpiderService {
       contestant.voteCount += 1;
       this.saveContestants();
 
-      if (isSupabaseConfigured && isValidUUID(userId) && isValidUUID(contestantId)) {
+      if (isSupabaseConfigured && this.checkValidUUID(userId) && this.checkValidUUID(contestantId)) {
         try {
           await this.ensureSupabaseProfile(userId);
 
@@ -485,7 +485,7 @@ class SpiderService {
       contestant.superVoteCount += 1;
       this.saveContestants();
 
-      if (isSupabaseConfigured && isValidUUID(this.currentUser.id) && isValidUUID(contestantId)) {
+      if (isSupabaseConfigured && this.checkValidUUID(this.currentUser.id) && this.checkValidUUID(contestantId)) {
         try {
           await this.ensureSupabaseProfile(this.currentUser.id);
 
@@ -544,7 +544,7 @@ class SpiderService {
       this.setUserRole("contestant");
     }
 
-    if (isSupabaseConfigured && isValidUUID(newContestant.userId)) {
+    if (isSupabaseConfigured && this.checkValidUUID(newContestant.userId)) {
       try {
         await this.ensureSupabaseProfile(newContestant.userId);
 
@@ -582,7 +582,7 @@ class SpiderService {
       contestant.status = "approved";
       this.saveContestants();
 
-      if (isSupabaseConfigured && isValidUUID(id)) {
+      if (isSupabaseConfigured && this.checkValidUUID(id)) {
         await supabase.from('contestants').update({ status: 'approved' }).eq('id', id).catch(() => {});
       }
     }
@@ -596,7 +596,7 @@ class SpiderService {
       contestant.rejectionReason = reason;
       this.saveContestants();
 
-      if (isSupabaseConfigured && isValidUUID(id)) {
+      if (isSupabaseConfigured && this.checkValidUUID(id)) {
         await supabase.from('contestants').update({ status: 'rejected', rejection_reason: reason }).eq('id', id).catch(() => {});
       }
     }
@@ -607,7 +607,7 @@ class SpiderService {
     this.contestants = this.contestants.filter((c) => c.id !== id);
     this.saveContestants();
 
-    if (isSupabaseConfigured && isValidUUID(id)) {
+    if (isSupabaseConfigured && this.checkValidUUID(id)) {
       await supabase.from('contestants').delete().eq('id', id).catch(() => {});
     }
   }
