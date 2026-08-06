@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Shield, Zap, Flame, Upload, Globe, CheckCircle, Clock, XCircle } from "lucide-react";
+import { User, Shield, Zap, Flame, Upload, Globe, CheckCircle, Clock, XCircle, LogOut, UserPlus } from "lucide-react";
 import { UserProfile, Contestant } from "../types";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -8,6 +8,8 @@ interface ProfilePageProps {
   userContestantSubmissions: Contestant[];
   onOpenSuperVoteModal: () => void;
   onNavigateUpload: () => void;
+  onLogout?: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({
@@ -15,8 +17,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   userContestantSubmissions,
   onOpenSuperVoteModal,
   onNavigateUpload,
+  onLogout,
+  onOpenAuthModal,
 }) => {
   const { t } = useLanguage();
+  const isGuest = user.username === "ziyaretci" || !user.email;
 
   return (
     <div className="min-h-screen text-white bg-[#050505] pb-24">
@@ -34,13 +39,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <h1 className="text-2xl sm:text-3xl font-black text-white">{user.displayName}</h1>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/40">
-                  {user.role}
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase ${
+                  isGuest ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/40"
+                }`}>
+                  {isGuest ? "Ziyaretçi" : user.role}
                 </span>
               </div>
 
               <p className="text-xs text-gray-400 font-mono">
-                @{user.username} • {user.email} • {user.country}
+                @{user.username} • {user.email || "E-posta yok"} • {user.country}
               </p>
 
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-1">
@@ -59,6 +66,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <Upload className="w-3.5 h-3.5" />
                   <span>{t("profile.submit_new", "Yeni Cosplay Gönder")}</span>
                 </button>
+
+                {isGuest ? (
+                  <button
+                    onClick={onOpenAuthModal}
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#FF003C] to-[#9D00FF] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all shadow-[0_0_12px_rgba(255,0,60,0.4)]"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Üye Ol / Giriş Yap</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={onLogout}
+                    className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-950/40 text-gray-400 hover:text-rose-300 border border-white/10 hover:border-rose-500/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Çıkış Yap</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

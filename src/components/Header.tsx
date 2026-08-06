@@ -22,6 +22,7 @@ interface HeaderProps {
   currentUser: UserProfile;
   onOpenSuperVoteModal: () => void;
   onOpenAdminLoginModal: () => void;
+  onOpenAuthModal?: () => void;
   superVoteBalance: number;
 }
 
@@ -31,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onOpenSuperVoteModal,
   onOpenAdminLoginModal,
+  onOpenAuthModal,
   superVoteBalance,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -156,23 +158,33 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Profile Button */}
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border transition-all cursor-pointer ${
-                activeTab === "profile"
-                  ? "bg-[#FF003C]/20 border-[#FF003C] text-rose-300"
-                  : "bg-[#080808] border-white/10 text-gray-300 hover:border-white/20 hover:text-white"
-              }`}
-            >
-              <img
-                src={currentUser.avatarUrl}
-                alt={currentUser.displayName}
-                className="w-6 h-6 rounded-full object-cover ring-2 ring-[#FF003C]/40"
-                referrerPolicy="no-referrer"
-              />
-              <span className="hidden sm:inline text-xs font-semibold">{currentUser.displayName}</span>
-            </button>
+            {/* Profile / Auth Button */}
+            {currentUser.username === "ziyaretci" || !currentUser.email ? (
+              <button
+                onClick={() => onOpenAuthModal && onOpenAuthModal()}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#FF003C] to-[#9D00FF] text-white text-xs font-bold hover:scale-105 transition-all shadow-[0_0_12px_rgba(255,0,60,0.4)] cursor-pointer"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Üye Ol / Giriş Yap</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  activeTab === "profile"
+                    ? "bg-[#FF003C]/20 border-[#FF003C] text-rose-300"
+                    : "bg-[#080808] border-white/10 text-gray-300 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser.displayName}
+                  className="w-6 h-6 rounded-full object-cover ring-2 ring-[#FF003C]/40"
+                  referrerPolicy="no-referrer"
+                />
+                <span className="hidden sm:inline text-xs font-semibold">{currentUser.displayName}</span>
+              </button>
+            )}
 
             {/* Mobile Menu Toggle Button */}
             <button

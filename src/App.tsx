@@ -11,6 +11,7 @@ import { WeeklyCompetitionsPage } from "./components/WeeklyCompetitionsPage";
 import { SuperVoteModal } from "./components/SuperVoteModal";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminLoginModal } from "./components/AdminLoginModal";
+import { AuthModal } from "./components/AuthModal";
 import { ProfilePage } from "./components/ProfilePage";
 import { MonetizationBanners } from "./components/MonetizationBanners";
 import { PwaPrompt } from "./components/PwaPrompt";
@@ -26,6 +27,12 @@ function MainApp() {
   const [hasVotedMap, setHasVotedMap] = useState<Record<string, boolean>>({});
   const [isSuperVoteModalOpen, setIsSuperVoteModalOpen] = useState(false);
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMessage, setAuthModalMessage] = useState<string>("");
+  const [pendingAction, setPendingAction] = useState<{
+    type: "vote" | "super_vote" | "upload" | "buy_tokens";
+    contestantId?: string;
+  } | null>(null);
   const [preselectedSuperVoteContestantId, setPreselectedSuperVoteContestantId] = useState<string>("");
 
   const refreshState = () => {
@@ -77,8 +84,70 @@ function MainApp() {
     setActiveTab("landing");
   };
 
+  const handleLogoutUser = async () => {
+    await spiderService.logoutUser();
+    refreshState();
+    setActiveTab("landing");
+  };
+
+  const requireAuthGuard = (
+    message: string,
+    action: { type: "vote" | "super_vote" | "upload" | "buy_tokens"; contestantId?: string }
+  ): boolean => {
+    if (spiderService.isGuestUser()) {
+      setAuthModalMessage(message);
+      setPendingAction(action);
+      setIsAuthModalOpen(true);
+      return true; // Is guest, auth required
+    }
+    return false; // Already authenticated
+  };
+
+  const handleAuthSuccess = async (newUser: UserProfile) => {
+    refreshState();
+    if (pendingAction) {
+      const action = pendingAction;
+      setPendingAction(null);
+
+      if (action.type === "vote" && action.contestantId) {
+        const res = await spiderService.castVote(action.contestantId);
+        if (res.success) alert(res.message);
+        refreshState();
+      } else if (action.type === "super_vote" && action.contestantId) {
+        if (newUser.superVoteBalance >= 1) {
+          const res = await spiderService.castSuperVote(action.contestantId, 10);
+          alert(res.message);
+          refreshState();
+        } else {
+          setPreselectedSuperVoteContestantId(action.contestantId);
+          setIsSuperVoteModalOpen(true);
+        }
+      } else if (action.type === "upload") {
+        setActiveTab("upload");
+      } else if (action.type === "buy_tokens") {
+        setIsSuperVoteModalOpen(true);
+      }
+    }
+  };
+
   const handleStandardVote = async (contestantId: string) => {
+    if (
+      requireAuthGuard("Oy kullanabilmek için lütfen üye olun veya hızlı giriş yapın! 🕷️✨", {
+        type: "vote",
+        contestantId,
+      })
+    ) {
+      return;
+    }
+
     const res = await spiderService.castVote(contestantId);
+    if (res.message === "REQUIRE_AUTH") {
+      setAuthModalMessage("Oy kullanabilmek için lütfen üye olun veya hızlı giriş yapın! 🕷️✨");
+      setPendingAction({ type: "vote", contestantId });
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     if (!res.success) {
       alert(res.message);
     }
@@ -86,17 +155,46 @@ function MainApp() {
   };
 
   const handleSuperVoteTrigger = async (contestantId: string) => {
+    if (
+      requireAuthGuard("Süper Oy kullanabilmek için lütfen üye olun veya hızlı giriş yapın! 🕷️✨", {
+        type: "super_vote",
+        contestantId,
+      })
+    ) {
+      return;
+    }
+
     const user = spiderService.getCurrentUser();
     if (user.superVoteBalance >= 1) {
-      // User has super vote tokens -> Directly cast the super vote (+10)
       const res = await spiderService.castSuperVote(contestantId, 10);
       alert(res.message);
       refreshState();
     } else {
-      // User has no tokens -> Open the token purchase store modal
       setPreselectedSuperVoteContestantId(contestantId);
       setIsSuperVoteModalOpen(true);
     }
+  };
+
+  const handleOpenSuperVoteStore = () => {
+    if (
+      requireAuthGuard("Süper Oy satın almak ve bakiyenizi saklamak için lütfen üye olun! 🕷️✨", {
+        type: "buy_tokens",
+      })
+    ) {
+      return;
+    }
+    setIsSuperVoteModalOpen(true);
+  };
+
+  const handleNavigateUpload = () => {
+    if (
+      requireAuthGuard("Cosplay yarışmasına katılmak için lütfen üye olun veya hızlı giriş yapın! 🕷️✨", {
+        type: "upload",
+      })
+    ) {
+      return;
+    }
+    setActiveTab("upload");
   };
 
   const handleBuyTokens = (amount: number) => {
@@ -124,8 +222,12 @@ function MainApp() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         currentUser={currentUser}
-        onOpenSuperVoteModal={() => setIsSuperVoteModalOpen(true)}
+        onOpenSuperVoteModal={handleOpenSuperVoteStore}
         onOpenAdminLoginModal={() => setIsAdminLoginModalOpen(true)}
+        onOpenAuthModal={() => {
+          setAuthModalMessage("Kullanıcı hesabınıza giriş yapın veya ücretsiz üye olun! 🕷️✨");
+          setIsAuthModalOpen(true);
+        }}
         superVoteBalance={currentUser.superVoteBalance}
       />
 
@@ -134,11 +236,11 @@ function MainApp() {
         {activeTab === "landing" && (
           <>
             <LandingPage
-              onJoinCompetition={() => setActiveTab("upload")}
+              onJoinCompetition={handleNavigateUpload}
               onVoteNow={() => setActiveTab("feed")}
               onViewLeaderboard={() => setActiveTab("leaderboard")}
               featuredContestants={approvedContestants}
-              onOpenSuperVoteModal={() => setIsSuperVoteModalOpen(true)}
+              onOpenSuperVoteModal={handleOpenSuperVoteStore}
             />
             <MonetizationBanners />
           </>
@@ -151,7 +253,7 @@ function MainApp() {
               hasVotedMap={hasVotedMap}
               onVote={handleStandardVote}
               onSuperVote={handleSuperVoteTrigger}
-              onJoinClick={() => setActiveTab("upload")}
+              onJoinClick={handleNavigateUpload}
             />
             <MonetizationBanners />
           </>
@@ -171,7 +273,7 @@ function MainApp() {
           <WeeklyCompetitionsPage
             winners={winners}
             onVoteNow={() => setActiveTab("feed")}
-            onJoinClick={() => setActiveTab("upload")}
+            onJoinClick={handleNavigateUpload}
           />
         )}
 
@@ -188,8 +290,13 @@ function MainApp() {
           <ProfilePage
             user={currentUser}
             userContestantSubmissions={userSubmissions}
-            onOpenSuperVoteModal={() => setIsSuperVoteModalOpen(true)}
-            onNavigateUpload={() => setActiveTab("upload")}
+            onOpenSuperVoteModal={handleOpenSuperVoteStore}
+            onNavigateUpload={handleNavigateUpload}
+            onLogout={handleLogoutUser}
+            onOpenAuthModal={() => {
+              setAuthModalMessage("Kullanıcı hesabınıza giriş yapın veya ücretsiz üye olun! 🕷️✨");
+              setIsAuthModalOpen(true);
+            }}
           />
         )}
 
@@ -202,6 +309,14 @@ function MainApp() {
           />
         )}
       </main>
+
+      {/* User Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+        message={authModalMessage}
+      />
 
       {/* Admin Login Modal */}
       <AdminLoginModal

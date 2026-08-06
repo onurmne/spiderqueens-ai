@@ -377,6 +377,48 @@ class SpiderService {
     return { ...this.currentUser };
   }
 
+  public isGuestUser(): boolean {
+    return (
+      !this.currentUser ||
+      this.currentUser.id === "00000000-0000-4000-a000-000000000000" ||
+      this.currentUser.username === "ziyaretci" ||
+      !this.currentUser.email
+    );
+  }
+
+  public async registerOrLoginUser(data: {
+    displayName: string;
+    username: string;
+    email: string;
+    country?: string;
+    avatarUrl?: string;
+  }): Promise<UserProfile> {
+    const newUser: UserProfile = {
+      id: generateUUID(),
+      email: data.email,
+      username: data.username.replace(/^@/, ""),
+      displayName: data.displayName,
+      role: "user",
+      avatarUrl:
+        data.avatarUrl ||
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+      superVoteBalance: 10,
+      country: data.country || "TR",
+      createdAt: new Date().toISOString(),
+    };
+
+    this.currentUser = newUser;
+    this.saveUser();
+    await this.syncUserToSupabase();
+    return this.currentUser;
+  }
+
+  public async logoutUser(): Promise<UserProfile> {
+    this.currentUser = { ...DEFAULT_USER };
+    this.saveUser();
+    return this.currentUser;
+  }
+
   public setUserRole(role: "user" | "contestant" | "admin") {
     this.currentUser = { ...this.currentUser, role };
     this.saveUser();
@@ -559,6 +601,14 @@ class SpiderService {
 
   // Cast Standard Vote (Max 1 vote per contestant per day)
   public async castVote(contestantId: string): Promise<{ success: boolean; message: string; newVoteCount: number }> {
+    if (this.isGuestUser()) {
+      return {
+        success: false,
+        message: "REQUIRE_AUTH",
+        newVoteCount: this.getContestantById(contestantId)?.voteCount || 0,
+      };
+    }
+
     const userId = this.currentUser.id;
 
     if (this.hasUserVotedToday(contestantId, userId)) {
@@ -638,6 +688,14 @@ class SpiderService {
 
   // Cast Super Vote (10 Votes)
   public async castSuperVote(contestantId: string, amount: number = 10): Promise<{ success: boolean; message: string; newVoteCount: number }> {
+    if (this.isGuestUser()) {
+      return {
+        success: false,
+        message: "REQUIRE_AUTH",
+        newVoteCount: this.getContestantById(contestantId)?.voteCount || 0,
+      };
+    }
+
     if (this.currentUser.superVoteBalance < 1) {
       return {
         success: false,
