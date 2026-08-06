@@ -11,7 +11,7 @@ import {
 import { supabase, isSupabaseConfigured } from "../supabase/client";
 
 // Helper function to generate RFC4122 compliant v4 UUIDs for PostgreSQL compatibility
-function generateUUID(): string {
+export function generateUUID(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
@@ -22,6 +22,35 @@ function generateUUID(): string {
   });
 }
 
+// Convert legacy/string IDs to a valid RFC4122 UUID string
+export function toValidUUID(id: string): string {
+  if (!id) return "00000000-0000-4000-a000-000000000000";
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(id)) {
+    return id;
+  }
+  // Convert custom string like "cont-1", "cont-5", "guest-visitor-1" to fixed valid UUIDs
+  if (id === "cont-1") return "10000000-0000-4000-a000-000000000001";
+  if (id === "cont-2") return "10000000-0000-4000-a000-000000000002";
+  if (id === "cont-3") return "10000000-0000-4000-a000-000000000003";
+  if (id === "cont-4") return "10000000-0000-4000-a000-000000000004";
+  if (id === "cont-5") return "10000000-0000-4000-a000-000000000005";
+  if (id === "cont-6") return "10000000-0000-4000-a000-000000000006";
+  if (id === "guest-visitor-1") return "00000000-0000-4000-a000-000000000000";
+  if (id === "comp-month-8") return "22222222-2222-4222-a222-000000000001";
+
+  // Generic fallback converting non-UUID string to deterministic UUID
+  let hexStr = "";
+  for (let i = 0; i < id.length; i++) {
+    hexStr += id.charCodeAt(i).toString(16);
+  }
+  while (hexStr.length < 32) {
+    hexStr += "0";
+  }
+  hexStr = hexStr.substring(0, 32);
+  return `${hexStr.substring(0, 8)}-${hexStr.substring(8, 12)}-4${hexStr.substring(13, 16)}-a${hexStr.substring(17, 20)}-${hexStr.substring(20, 32)}`;
+}
+
 // Import generated visual assets
 import heroGwenPic from "../assets/images/hero_spiderqueen_cosplay_1785866609591.jpg";
 import gwenCardPic from "../assets/images/gwen_cosplay_card_1785866623877.jpg";
@@ -30,7 +59,7 @@ import venomCardPic from "../assets/images/venom_cosplay_card_1785866653231.jpg"
 
 // Default Initial Seed Competition (Monthly)
 export const CURRENT_COMPETITION: Competition = {
-  id: "comp-month-8",
+  id: "22222222-2222-4222-a222-000000000001",
   title: "Month #8: Spider-Verse Cyber Showdown",
   description: "Global monthly battle for the ultimate Spider-Queen title. Top voted contestant wins $1,000 cash, featured profile spotlight, and custom Spider Crown!",
   startDate: new Date(Date.now() - 12 * 86400000).toISOString(),
@@ -43,10 +72,10 @@ export const CURRENT_COMPETITION: Competition = {
 // Initial Seed Winners Archive
 export const SEED_WINNERS: Winner[] = [
   {
-    id: "win-7",
-    competitionId: "comp-month-7",
+    id: "40000000-0000-4000-a000-000000000007",
+    competitionId: "22222222-2222-4222-a222-000000000007",
     competitionTitle: "Month #7: Neon Web Masters",
-    contestantId: "c-archive-1",
+    contestantId: "10000000-0000-4000-a000-000000000002",
     displayName: "Elena Vance",
     country: "Germany",
     cosplayPhotoUrl: silkCardPic,
@@ -55,10 +84,10 @@ export const SEED_WINNERS: Winner[] = [
     crownedAt: new Date(Date.now() - 30 * 86400000).toISOString(),
   },
   {
-    id: "win-6",
-    competitionId: "comp-month-6",
+    id: "40000000-0000-4000-a000-000000000006",
+    competitionId: "22222222-2222-4222-a222-000000000006",
     competitionTitle: "Month #6: Symbiote Invasion",
-    contestantId: "c-archive-2",
+    contestantId: "10000000-0000-4000-a000-000000000003",
     displayName: "Sakura Kishi",
     country: "Japan",
     cosplayPhotoUrl: venomCardPic,
@@ -67,10 +96,10 @@ export const SEED_WINNERS: Winner[] = [
     crownedAt: new Date(Date.now() - 60 * 86400000).toISOString(),
   },
   {
-    id: "win-5",
-    competitionId: "comp-month-5",
+    id: "40000000-0000-4000-a000-000000000005",
+    competitionId: "22222222-2222-4222-a222-000000000005",
     competitionTitle: "Month #5: Multiverse Queens",
-    contestantId: "c-archive-3",
+    contestantId: "10000000-0000-4000-a000-000000000004",
     displayName: "Sophia Martinez",
     country: "Mexico",
     cosplayPhotoUrl: gwenCardPic,
@@ -83,8 +112,8 @@ export const SEED_WINNERS: Winner[] = [
 // Initial Seed Approved Contestants
 export const INITIAL_CONTESTANTS: Contestant[] = [
   {
-    id: "cont-1",
-    userId: "u-gwen",
+    id: "10000000-0000-4000-a000-000000000001",
+    userId: "30000000-0000-4000-a000-000000000001",
     displayName: "Alexis 'Gwenom' Ray",
     username: "gwenom_synth",
     instagramUrl: "https://instagram.com/gwenom_synth",
@@ -97,13 +126,13 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
     status: "approved",
     voteCount: 4890,
     superVoteCount: 140,
-    competitionId: "comp-month-8",
+    competitionId: "22222222-2222-4222-a222-000000000001",
     createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
     isFeatured: true,
   },
   {
-    id: "cont-2",
-    userId: "u-silk",
+    id: "10000000-0000-4000-a000-000000000002",
+    userId: "30000000-0000-4000-a000-000000000002",
     displayName: "Mei Lin 'Silk' Tanaka",
     username: "silk_weaver_cos",
     instagramUrl: "https://instagram.com/silk_weaver_cos",
@@ -116,13 +145,13 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
     status: "approved",
     voteCount: 4210,
     superVoteCount: 110,
-    competitionId: "comp-month-8",
+    competitionId: "22222222-2222-4222-a222-000000000001",
     createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
     isFeatured: true,
   },
   {
-    id: "cont-3",
-    userId: "u-venom",
+    id: "10000000-0000-4000-a000-000000000003",
+    userId: "30000000-0000-4000-a000-000000000003",
     displayName: "Chloe De La Cruz",
     username: "venomous_queen",
     instagramUrl: "https://instagram.com/venomous_queen",
@@ -135,13 +164,13 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
     status: "approved",
     voteCount: 3840,
     superVoteCount: 95,
-    competitionId: "comp-month-8",
+    competitionId: "22222222-2222-4222-a222-000000000001",
     createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
     isFeatured: false,
   },
   {
-    id: "cont-4",
-    userId: "u-gwen-classic",
+    id: "10000000-0000-4000-a000-000000000004",
+    userId: "30000000-0000-4000-a000-000000000004",
     displayName: "Sienna Miller",
     username: "sienna_spidergwen",
     instagramUrl: "https://instagram.com/sienna_spidergwen",
@@ -154,13 +183,13 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
     status: "approved",
     voteCount: 3120,
     superVoteCount: 60,
-    competitionId: "comp-month-8",
+    competitionId: "22222222-2222-4222-a222-000000000001",
     createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
     isFeatured: false,
   },
   {
-    id: "cont-5",
-    userId: "u-spiderwoman",
+    id: "10000000-0000-4000-a000-000000000005",
+    userId: "30000000-0000-4000-a000-000000000005",
     displayName: "Camila Rossi",
     username: "camila_spiderwoman",
     instagramUrl: "https://instagram.com/camila_spiderwoman",
@@ -173,13 +202,13 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
     status: "approved",
     voteCount: 2950,
     superVoteCount: 50,
-    competitionId: "comp-month-8",
+    competitionId: "22222222-2222-4222-a222-000000000001",
     createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
     isFeatured: false,
   },
   {
-    id: "cont-6",
-    userId: "u-pending-demo",
+    id: "10000000-0000-4000-a000-000000000006",
+    userId: "30000000-0000-4000-a000-000000000006",
     displayName: "Aria Thorne",
     username: "aria_noir_spider",
     instagramUrl: "https://instagram.com/aria_noir_spider",
@@ -192,7 +221,7 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
     status: "pending",
     voteCount: 0,
     superVoteCount: 0,
-    competitionId: "comp-month-8",
+    competitionId: "22222222-2222-4222-a222-000000000001",
     createdAt: new Date().toISOString(),
     isFeatured: false,
   },
@@ -200,7 +229,7 @@ export const INITIAL_CONTESTANTS: Contestant[] = [
 
 // Initial Seed Current User (Guest Visitor by default)
 export const DEFAULT_USER: UserProfile = {
-  id: "guest-visitor-1",
+  id: "00000000-0000-4000-a000-000000000000",
   email: "",
   username: "ziyaretci",
   displayName: "Ziyaretçi",
@@ -394,19 +423,20 @@ class SpiderService {
   private async syncUserToSupabase() {
     if (!isSupabaseConfigured || !this.currentUser) return;
     try {
+      const validUserId = toValidUUID(this.currentUser.id);
       const userPayload = {
-        id: this.currentUser.id,
-        email: this.currentUser.email || `${this.currentUser.username}@spiderqueens.app`,
-        username: this.currentUser.username,
-        display_name: this.currentUser.displayName,
-        role: this.currentUser.role,
-        avatar_url: this.currentUser.avatarUrl,
-        super_vote_balance: this.currentUser.superVoteBalance,
-        country: this.currentUser.country,
+        id: validUserId,
+        email: this.currentUser.email || `${this.currentUser.username || 'user'}@spiderqueens.app`,
+        username: this.currentUser.username || "user_" + validUserId.substring(0, 6),
+        display_name: this.currentUser.displayName || "Ziyaretçi",
+        role: this.currentUser.role || "user",
+        avatar_url: this.currentUser.avatarUrl || "",
+        super_vote_balance: this.currentUser.superVoteBalance || 0,
+        country: this.currentUser.country || "TR",
       };
       await supabase.from("users").upsert([userPayload], { onConflict: "id" });
     } catch (err) {
-      // Ignore if user already exists
+      // Catch silently if users table is omitted or restricted
     }
   }
 
@@ -475,10 +505,29 @@ class SpiderService {
         this.saveContestants();
         console.log(`✅ [Supabase Sync] ${parsedContestants.length} adet yarışmacı Supabase veritabanından çekildi.`);
       } else if (!contestantsErr && dbContestants && dbContestants.length === 0) {
-        console.log("🌱 [Supabase Sync] Veritabanı boş. Başlangıç yarışmacıları Supabase'e yükleniyor...");
+        console.log("🌱 [Supabase Sync] Veritabanı boş. Başlangıç kullanıcıları ve yarışmacıları Supabase'e yükleniyor...");
+
+        // First seed users so foreign key references match
+        const seedUsers = INITIAL_CONTESTANTS.map((c) => ({
+          id: toValidUUID(c.userId),
+          email: `${c.username}@spiderqueens.app`,
+          username: c.username,
+          display_name: c.displayName,
+          role: "contestant",
+          avatar_url: c.profilePhotoUrl,
+          super_vote_balance: 10,
+          country: c.country,
+        }));
+
+        try {
+          await supabase.from("users").upsert(seedUsers, { onConflict: "id" });
+        } catch {
+          // ignore
+        }
+
         const seedPayloads = INITIAL_CONTESTANTS.map((c) => ({
-          id: c.id,
-          user_id: c.userId,
+          id: toValidUUID(c.id),
+          user_id: toValidUUID(c.userId),
           display_name: c.displayName,
           username: c.username,
           instagram_url: c.instagramUrl,
@@ -491,12 +540,17 @@ class SpiderService {
           status: c.status,
           vote_count: c.voteCount,
           super_vote_count: c.superVoteCount,
-          competition_id: c.competitionId,
+          competition_id: toValidUUID(c.competitionId),
           is_featured: c.isFeatured || false,
           created_at: c.createdAt,
         }));
-        await supabase.from("contestants").insert(seedPayloads);
-        console.log("✅ [Supabase Sync] Başlangıç yarışmacıları Supabase'e kaydedildi!");
+
+        const { error: seedErr } = await supabase.from("contestants").insert(seedPayloads);
+        if (!seedErr) {
+          console.log("✅ [Supabase Sync] Başlangıç yarışmacıları Supabase'e kaydedildi!");
+        } else {
+          console.warn("⚠️ [Supabase Sync Contestants Hata]:", seedErr.message);
+        }
       }
     } catch (err) {
       console.warn("⚠️ [Supabase Sync Hata]:", err);
@@ -536,10 +590,13 @@ class SpiderService {
       try {
         await this.syncUserToSupabase();
 
+        const validContestantId = toValidUUID(contestantId);
+        const validUserId = toValidUUID(userId);
+
         const votePayload = {
           id: newVote.id,
-          user_id: userId,
-          contestant_id: contestantId,
+          user_id: validUserId,
+          contestant_id: validContestantId,
           created_at: newVote.createdAt,
         };
 
@@ -554,10 +611,15 @@ class SpiderService {
           const { error: contErr } = await supabase
             .from("contestants")
             .update({ vote_count: contestant.voteCount })
-            .eq("id", contestantId);
+            .eq("id", validContestantId);
 
           if (contErr) {
             console.warn("⚠️ [Supabase Contestants Hata]:", contErr.message);
+            // Fallback try with raw contestantId
+            await supabase
+              .from("contestants")
+              .update({ vote_count: contestant.voteCount })
+              .eq("id", contestantId);
           } else {
             console.log(`🎉 [Supabase] Contestants tablosunda ${contestant.displayName} oy sayısı güncellendi: ${contestant.voteCount}`);
           }
@@ -609,10 +671,13 @@ class SpiderService {
       try {
         await this.syncUserToSupabase();
 
+        const validContestantId = toValidUUID(contestantId);
+        const validUserId = toValidUUID(this.currentUser.id);
+
         const superVotePayload = {
           id: newSuperVote.id,
-          user_id: this.currentUser.id,
-          contestant_id: contestantId,
+          user_id: validUserId,
+          contestant_id: validContestantId,
           amount,
           created_at: newSuperVote.createdAt,
         };
@@ -631,7 +696,7 @@ class SpiderService {
               vote_count: contestant.voteCount,
               super_vote_count: contestant.superVoteCount,
             })
-            .eq("id", contestantId);
+            .eq("id", validContestantId);
 
           if (contErr) {
             console.warn("⚠️ [Supabase Contestants Hata]:", contErr.message);
@@ -656,7 +721,7 @@ class SpiderService {
     const isAutoApprove = this.n8nConfig.autoApprove;
     const newContestant: Contestant = {
       id: generateUUID(),
-      userId: this.currentUser.id,
+      userId: toValidUUID(this.currentUser.id),
       displayName: formData.displayName,
       username: formData.username.replace(/^@/, ""),
       instagramUrl: formData.instagramUrl.startsWith("http")
@@ -689,7 +754,7 @@ class SpiderService {
 
         const contestantPayload = {
           id: newContestant.id,
-          user_id: newContestant.userId,
+          user_id: toValidUUID(newContestant.userId),
           display_name: newContestant.displayName,
           username: newContestant.username,
           instagram_url: newContestant.instagramUrl,
@@ -702,7 +767,7 @@ class SpiderService {
           status: newContestant.status,
           vote_count: 0,
           super_vote_count: 0,
-          competition_id: newContestant.competitionId,
+          competition_id: toValidUUID(newContestant.competitionId),
           created_at: newContestant.createdAt,
         };
 
@@ -728,7 +793,7 @@ class SpiderService {
       this.saveContestants();
 
       if (isSupabaseConfigured) {
-        await supabase.from("contestants").update({ status: "approved" }).eq("id", id);
+        await supabase.from("contestants").update({ status: "approved" }).eq("id", toValidUUID(id));
       }
     }
     return contestant;
@@ -743,7 +808,7 @@ class SpiderService {
       this.saveContestants();
 
       if (isSupabaseConfigured) {
-        await supabase.from("contestants").update({ status: "rejected", rejection_reason: reason }).eq("id", id);
+        await supabase.from("contestants").update({ status: "rejected", rejection_reason: reason }).eq("id", toValidUUID(id));
       }
     }
     return contestant;
@@ -755,7 +820,7 @@ class SpiderService {
     this.saveContestants();
 
     if (isSupabaseConfigured) {
-      await supabase.from("contestants").delete().eq("id", id);
+      await supabase.from("contestants").delete().eq("id", toValidUUID(id));
     }
   }
 
