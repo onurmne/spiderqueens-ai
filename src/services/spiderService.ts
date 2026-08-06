@@ -32,6 +32,15 @@ export interface Contestant {
   bio?: string;
 }
 
+export interface RewardPoolStatus {
+  month: string;
+  totalSuperVotesThisMonth: number;
+  thresholdRequired: number;
+  isUnlocked: boolean;
+  prizeAmount: number;
+  statusMessage: string;
+}
+
 // Basit UUID üreteci (Tarayıcı ve Node ortamı uyumlu)
 function generateUUID(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -47,6 +56,9 @@ function generateUUID(): string {
 class SpiderService {
   public currentUser: UserProfile | null = null;
   public contestants: Contestant[] = [];
+  
+  private readonly MONTHLY_PRIZE_USD = 1000;
+  private readonly MIN_SUPER_VOTE_THRESHOLD = 1000;
 
   constructor() {
     this.loadUserLocal();
@@ -72,7 +84,7 @@ class SpiderService {
   }
 
   /**
-   * Kullanıcı kayıt veya giriş metodu (E-posta mükerrer kontrolü ile güncellendi)
+   * Kullanıcı kayıt veya giriş metodu (E-posta mükerrer kontrolü ile)
    */
   public async registerOrLoginUser(data: {
     displayName: string;
@@ -152,6 +164,42 @@ class SpiderService {
     } catch (err) {
       console.error("Sync user to Supabase error:", err);
     }
+  }
+
+  /**
+   * Aylık 1000$ ödül havuzunun ve eşik durumunun kontrolü
+   */
+  public async checkMonthlyRewardStatus(): Promise<RewardPoolStatus> {
+    const currentMonthStr = new Date().toISOString().slice(0, 7); // Örn: "2026-06"
+    let totalVotes = 0;
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { count, error } = await supabase
+          .from("transactions")
+          .select("*", { count: "exact", head: true })
+          .gte("created_at", `${currentMonthStr}-01T00:00:00.000Z`);
+
+        if (!error && count !== null) {
+          totalVotes = count;
+        }
+      } catch (err) {
+        console.warn("⚠️ [Reward Status Check Error]:", err);
+      }
+    }
+
+    const isUnlocked = totalVotes >= this.MIN_SUPER_VOTE_THRESHOLD;
+
+    return {
+      month: currentMonthStr,
+      totalSuperVotesThisMonth: totalVotes,
+      thresholdRequired: this.MIN_SUPER_VOTE_THRESHOLD,
+      isUnlocked,
+      prizeAmount: isUnlocked ? this.MONTHLY_PRIZE_USD : 0,
+      statusMessage: isUnlocked 
+        ? `Tebrikler! ${this.MONTHLY_PRIZE_USD}$ büyük ödül bu ay için aktifleşti.` 
+        : `Ödül havuzu aktifleşmesi için ${this.MIN_SUPER_VOTE_THRESHOLD - totalVotes} Super Vote daha gerekiyor (Devreder).`
+    };
   }
 
   public logout() {
