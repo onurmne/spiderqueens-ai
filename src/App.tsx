@@ -45,8 +45,13 @@ function MainApp() {
   };
 
   useEffect(() => {
-    refreshState();
-    testSupabaseConnection();
+    const initApp = async () => {
+      refreshState();
+      await testSupabaseConnection();
+      await spiderService.loadInitialDataFromSupabase();
+      refreshState();
+    };
+    initApp();
 
     // Check if URL contains admin parameter or route
     if (

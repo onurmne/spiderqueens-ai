@@ -28,8 +28,11 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public users are viewable by everyone" ON public.users
   FOR SELECT USING (true);
 
-CREATE POLICY "Users can update their own profile" ON public.users
-  FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Public users insert" ON public.users
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Public users update" ON public.users
+  FOR UPDATE USING (true);
 
 
 -- ----------------------------------------------------------------
@@ -52,10 +55,8 @@ ALTER TABLE public.competitions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Competitions viewable by everyone" ON public.competitions
   FOR SELECT USING (true);
 
-CREATE POLICY "Only admins can manage competitions" ON public.competitions
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
-  );
+CREATE POLICY "Competitions manageable" ON public.competitions
+  FOR ALL USING (true);
 
 
 -- ----------------------------------------------------------------
@@ -88,14 +89,17 @@ CREATE INDEX IF NOT EXISTS idx_contestants_competition ON public.contestants(com
 
 ALTER TABLE public.contestants ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Approved contestants are viewable by everyone" ON public.contestants
-  FOR SELECT USING (status = 'approved' OR auth.uid() = user_id OR EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Contestants viewable by everyone" ON public.contestants
+  FOR SELECT USING (true);
 
-CREATE POLICY "Authenticated users can create contestant submission" ON public.contestants
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Public create contestant submission" ON public.contestants
+  FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Contestants can update their pending submission" ON public.contestants
-  FOR UPDATE USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Public update contestants" ON public.contestants
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Public delete contestants" ON public.contestants
+  FOR DELETE USING (true);
 
 
 -- ----------------------------------------------------------------
@@ -113,11 +117,11 @@ CREATE INDEX IF NOT EXISTS idx_votes_user_contestant ON public.votes(user_id, co
 
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Votes viewable by authenticated users" ON public.votes
-  FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Votes viewable by everyone" ON public.votes
+  FOR SELECT USING (true);
 
-CREATE POLICY "Users can cast votes" ON public.votes
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Public can cast votes" ON public.votes
+  FOR INSERT WITH CHECK (true);
 
 
 -- ----------------------------------------------------------------
@@ -136,8 +140,8 @@ ALTER TABLE public.super_votes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Super votes viewable by everyone" ON public.super_votes
   FOR SELECT USING (true);
 
-CREATE POLICY "Users can cast super votes" ON public.super_votes
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Public can cast super votes" ON public.super_votes
+  FOR INSERT WITH CHECK (true);
 
 
 -- ----------------------------------------------------------------

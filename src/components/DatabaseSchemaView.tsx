@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public users viewable" ON public.users FOR SELECT USING (true);
-CREATE POLICY "User edit profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Public users insert" ON public.users FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public users update" ON public.users FOR UPDATE USING (true);
 
 -- 2. COMPETITIONS TABLE
 CREATE TABLE IF NOT EXISTS public.competitions (
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS public.competitions (
 
 ALTER TABLE public.competitions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Competitions viewable" ON public.competitions FOR SELECT USING (true);
+CREATE POLICY "Competitions manage" ON public.competitions FOR ALL USING (true);
 
 -- 3. CONTESTANTS TABLE
 CREATE TABLE IF NOT EXISTS public.contestants (
@@ -75,9 +77,11 @@ CREATE TABLE IF NOT EXISTS public.contestants (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_contestants_status_votes ON public.contestants(status, vote_count DESC);
+CREATE INDEX IF NOT EXISTS idx_contestants_status_votes ON public.contestants(status, vote_count DESC);
 ALTER TABLE public.contestants ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Approved viewable" ON public.contestants FOR SELECT USING (status = 'approved');
+CREATE POLICY "Contestants viewable" ON public.contestants FOR SELECT USING (true);
+CREATE POLICY "Contestants insert" ON public.contestants FOR INSERT WITH CHECK (true);
+CREATE POLICY "Contestants update" ON public.contestants FOR UPDATE USING (true);
 
 -- 4. VOTES TABLE
 CREATE TABLE IF NOT EXISTS public.votes (
@@ -89,7 +93,8 @@ CREATE TABLE IF NOT EXISTS public.votes (
 );
 
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Cast vote" ON public.votes FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Votes viewable" ON public.votes FOR SELECT USING (true);
+CREATE POLICY "Cast vote" ON public.votes FOR INSERT WITH CHECK (true);
 
 -- 5. SUPER_VOTES TABLE
 CREATE TABLE IF NOT EXISTS public.super_votes (
@@ -102,6 +107,7 @@ CREATE TABLE IF NOT EXISTS public.super_votes (
 
 ALTER TABLE public.super_votes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Super votes viewable" ON public.super_votes FOR SELECT USING (true);
+CREATE POLICY "Cast super vote" ON public.super_votes FOR INSERT WITH CHECK (true);
 
 -- 6. WINNERS TABLE
 CREATE TABLE IF NOT EXISTS public.winners (

@@ -33,7 +33,7 @@ export const isSupabaseConfigured = Boolean(
 );
 
 // Export configured Supabase client with proper TypeScript types
-export const supabase: SupabaseClient<Database> = createClient<Database>(
+export const supabase = createClient<any>(
   supabaseUrl || "https://placeholder-project.supabase.co",
   supabaseAnonKey || "placeholder-anon-key"
 );
