@@ -227,7 +227,6 @@ class SpiderService {
   }
 
   private async loadInitialData() {
-    // Fallback to local storage initialization while integrating Supabase live queries
     if (typeof localStorage === "undefined") return;
 
     const storedContestants = localStorage.getItem(STORAGE_KEYS.CONTESTANTS);
@@ -272,9 +271,8 @@ class SpiderService {
     // Try fetching live data from Supabase if configured
     if (isSupabaseConfigured()) {
       try {
-        const { data: remoteContestants } = await supabase.from('contestants').select('*');
-        if (remoteContestants && remoteContestants.length > 0) {
-          // Map snake_case database columns to camelCase Contestant interface if needed
+        const { data: remoteContestants, error } = await supabase.from('contestants').select('*');
+        if (!error && remoteContestants && remoteContestants.length > 0) {
           this.contestants = remoteContestants.map((c: any) => ({
             id: c.id,
             userId: c.profile_id,
@@ -289,11 +287,11 @@ class SpiderService {
             bio: c.bio,
             status: c.status,
             rejectionReason: c.rejection_reason,
-            voteCount: c.vote_count,
-            superVoteCount: c.super_vote_count,
+            voteCount: c.vote_count ?? 0,
+            superVoteCount: c.super_vote_count ?? 0,
             competitionId: c.competition_id,
             createdAt: c.created_at,
-            isFeatured: c.is_featured,
+            isFeatured: c.is_featured ?? false,
           }));
         }
       } catch (err) {
@@ -379,6 +377,27 @@ class SpiderService {
     return this.hasUserVotedToday(contestantId, userId);
   }
 
+  // Ensure user profile exists in Supabase profiles table before adding votes/super_votes
+  private async ensureSupabaseProfile(userId: string) {
+    if (!isSupabaseConfigured()) return;
+    try {
+      const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+      if (!data) {
+        await supabase.from('profiles').insert({
+          id: userId,
+          email: this.currentUser.email,
+          username: this.currentUser.username,
+          display_name: this.currentUser.displayName,
+          role: this.currentUser.role,
+          avatar_url: this.currentUser.avatarUrl,
+          country: this.currentUser.country,
+        });
+      }
+    } catch (e) {
+      console.warn("Profile check/create warning:", e);
+    }
+  }
+
   public async castVote(contestantId: string): Promise<{ success: boolean; message: string; newVoteCount: number }> {
     const userId = this.currentUser.id;
 
@@ -407,12 +426,22 @@ class SpiderService {
 
       // Sync with Supabase if active
       if (isSupabaseConfigured()) {
-        await supabase.from('votes').insert([{
-          profile_id: userId,
-          contestant_id: contestantId,
-        }]).catch(() => {});
-        
-        await supabase.from('contestants').update({ vote_count: contestant.voteCount }).eq('id', contestantId).catch(() => {});
+        try {
+          await this.ensureSupabaseProfile(userId);
+
+          const { error: voteErr } = await supabase.from('votes').insert({
+            profile_id: userId,
+            contestant_id: contestantId,
+          });
+          if (voteErr) console.error("Supabase vote insert error:", voteErr.message);
+
+          const { error: updateErr } = await supabase.from('contestants').update({ 
+            vote_count: contestant.voteCount 
+          }).eq('id', contestantId);
+          if (updateErr) console.error("Supabase contestant vote update error:", updateErr.message);
+        } catch (err) {
+          console.error("Supabase vote sync exception:", err);
+        }
       }
     }
 
@@ -452,16 +481,24 @@ class SpiderService {
       this.saveContestants();
 
       if (isSupabaseConfigured()) {
-        await supabase.from('super_votes').insert([{
-          profile_id: this.currentUser.id,
-          contestant_id: contestantId,
-          amount,
-        }]).catch(() => {});
+        try {
+          await this.ensureSupabaseProfile(this.currentUser.id);
 
-        await supabase.from('contestants').update({ 
-          vote_count: contestant.voteCount,
-          super_vote_count: contestant.superVoteCount 
-        }).eq('id', contestantId).catch(() => {});
+          const { error: svErr } = await supabase.from('super_votes').insert({
+            profile_id: this.currentUser.id,
+            contestant_id: contestantId,
+            amount,
+          });
+          if (svErr) console.error("Supabase super_vote insert error:", svErr.message);
+
+          const { error: updateErr } = await supabase.from('contestants').update({ 
+            vote_count: contestant.voteCount,
+            super_vote_count: contestant.superVoteCount 
+          }).eq('id', contestantId);
+          if (updateErr) console.error("Supabase contestant super_vote update error:", updateErr.message);
+        } catch (err) {
+          console.error("Supabase super_vote sync exception:", err);
+        }
       }
     }
 
@@ -504,20 +541,32 @@ class SpiderService {
 
     // Sync insert to Supabase contestants table
     if (isSupabaseConfigured()) {
-      await supabase.from('contestants').insert([{
-        profile_id: newContestant.userId,
-        competition_id: newContestant.competitionId,
-        display_name: newContestant.displayName,
-        username: newContestant.username,
-        instagram_url: newContestant.instagramUrl,
-        country: newContestant.country,
-        country_code: newContestant.countryCode,
-        profile_photo_url: newContestant.profilePhotoUrl,
-        cosplay_photo_url: newContestant.cosplayPhotoUrl,
-        category: newContestant.category,
-        bio: newContestant.bio,
-        status: newContestant.status,
-      }]).catch((err) => console.warn("Supabase insert contestant error:", err));
+      try {
+        await this.ensureSupabaseProfile(newContestant.userId);
+
+        const { error } = await supabase.from('contestants').insert({
+          profile_id: newContestant.userId,
+          competition_id: newContestant.competitionId,
+          display_name: newContestant.displayName,
+          username: newContestant.username,
+          instagram_url: newContestant.instagramUrl,
+          country: newContestant.country,
+          country_code: newContestant.countryCode,
+          profile_photo_url: newContestant.profilePhotoUrl,
+          cosplay_photo_url: newContestant.cosplayPhotoUrl,
+          category: newContestant.category,
+          bio: newContestant.bio,
+          status: newContestant.status,
+          vote_count: 0,
+          super_vote_count: 0,
+        });
+
+        if (error) {
+          console.error("Supabase insert contestant error:", error.message);
+        }
+      } catch (err) {
+        console.warn("Supabase insert contestant exception:", err);
+      }
     }
 
     return { contestant: newContestant, n8nTriggered: true };
