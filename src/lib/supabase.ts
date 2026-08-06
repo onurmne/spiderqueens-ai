@@ -78,3 +78,21 @@ export async function testSupabaseConnection(): Promise<boolean> {
 
 // Automatically test connection on application startup
 testSupabaseConnection();
+
+// Bağlantı ve tablo testi
+export async function testSupabaseConnection() {
+    console.log("🔍 Supabase bağlantı testi başlatılıyor...");
+    const tables = ['profiles', 'competitions', 'contestants', 'votes'];
+    
+    for (const table of tables) {
+        const { data, error } = await supabase.from(table).select('*').limit(1);
+        if (error) {
+            console.error(`❌ [${table}] tablosu hatası:`, error.message);
+        } else {
+            console.log(`✅ [${table}] tablosu başarılı! Kayıt sayısı:`, data.length);
+        }
+    }
+}
+
+// Otomatik tetikle
+testSupabaseConnection();
