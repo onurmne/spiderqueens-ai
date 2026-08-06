@@ -1,0 +1,6 @@
+{
+  "name": "SpiderQueens",
+  "description": "Global cosplay competition platform for female Spider-Man inspired creators with voting, leaderboards, super votes, admin moderation, and n8n webhook automation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
