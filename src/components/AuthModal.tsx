@@ -26,7 +26,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   message,
 }) => {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<"register" | "login">("register");
 
   // Form states
   const [displayName, setDisplayName] = useState("");
@@ -75,26 +74,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleQuickDemoLogin = async () => {
-    setLoading(true);
-    try {
-      const demoUser = await spiderService.registerOrLoginUser({
-        displayName: "Spider Hayranı",
-        username: "spider_fan_" + Math.floor(1000 + Math.random() * 9000),
-        email: `fan_${Date.now()}@spiderqueens.app`,
-        country: "TR",
-        avatarUrl: PRESET_AVATARS[0].url,
-      });
-
-      setLoading(false);
-      onSuccess(demoUser);
-      onClose();
-    } catch (err: any) {
-      setLoading(false);
-      setError("Hızlı giriş yaparken bir hata oluştu.");
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div className="relative w-full max-w-lg bg-[#0c0c0c] border border-[#FF003C]/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(255,0,60,0.25)] space-y-6 text-white max-h-[90vh] overflow-y-auto">
@@ -127,30 +106,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="grid grid-cols-2 p-1 bg-[#141414] rounded-xl border border-white/10">
-          <button
-            onClick={() => setActiveTab("register")}
-            className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "register"
-                ? "bg-gradient-to-r from-[#FF003C] to-[#9D00FF] text-white shadow-md"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            Üye Ol (Yeni Hesap)
-          </button>
-          <button
-            onClick={() => setActiveTab("login")}
-            className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "login"
-                ? "bg-gradient-to-r from-[#FF003C] to-[#9D00FF] text-white shadow-md"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            Hızlı Giriş Yap
-          </button>
-        </div>
-
         {error && (
           <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-300 text-xs font-semibold text-center">
             {error}
@@ -158,8 +113,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         )}
 
         {/* Register Form */}
-        {activeTab === "register" ? (
-          <form onSubmit={handleRegisterSubmit} className="space-y-4">
+        <form onSubmit={handleRegisterSubmit} className="space-y-4">
             {/* Display Name */}
             <div>
               <label className="block text-xs font-bold text-gray-300 mb-1">
@@ -271,23 +225,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {loading ? "Supabase'e Kaydediliyor..." : "🕷️ Hesabımı Oluştur & Oy Kullan"}
             </button>
           </form>
-        ) : (
-          /* Fast Demo Login */
-          <div className="space-y-4 py-2 text-center">
-            <p className="text-xs text-gray-300">
-              Test etmek için anında otomatik profil oluşturup Supabase'e kaydedebilirsiniz:
-            </p>
-
-            <button
-              onClick={handleQuickDemoLogin}
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm tracking-wide shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{loading ? "Giriş Yapılıyor..." : "Tek Tıkla Otomatik Giriş Yap (+10 Jeton)"}</span>
-            </button>
-          </div>
-        )}
 
         {/* Footer Note */}
         <p className="text-[10px] text-gray-500 text-center font-mono">

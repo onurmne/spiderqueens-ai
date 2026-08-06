@@ -57,6 +57,47 @@ import gwenCardPic from "../assets/images/gwen_cosplay_card_1785866623877.jpg";
 import silkCardPic from "../assets/images/silk_cosplay_card_1785866637691.jpg";
 import venomCardPic from "../assets/images/venom_cosplay_card_1785866653231.jpg";
 
+export function resolveCosplayPhotoUrl(id?: string, url?: string): string {
+  if (
+    !url ||
+    url.startsWith("/src/") ||
+    url.startsWith("/@fs/") ||
+    url.startsWith("http://localhost") ||
+    url.includes("hero_spiderqueen_cosplay") ||
+    url.includes("gwen_cosplay_card") ||
+    url.includes("silk_cosplay_card") ||
+    url.includes("venom_cosplay_card")
+  ) {
+    if (id === "10000000-0000-4000-a000-000000000001" || id === "cont-1" || url?.includes("hero_spiderqueen")) {
+      return heroGwenPic;
+    }
+    if (id === "10000000-0000-4000-a000-000000000002" || id === "cont-2" || url?.includes("silk_cosplay")) {
+      return silkCardPic;
+    }
+    if (id === "10000000-0000-4000-a000-000000000003" || id === "cont-3" || url?.includes("venom_cosplay")) {
+      return venomCardPic;
+    }
+    if (id === "10000000-0000-4000-a000-000000000004" || id === "cont-4" || url?.includes("gwen_cosplay")) {
+      return gwenCardPic;
+    }
+    if (id === "10000000-0000-4000-a000-000000000005" || id === "cont-5") {
+      return "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80";
+    }
+    if (id === "10000000-0000-4000-a000-000000000006" || id === "cont-6") {
+      return heroGwenPic;
+    }
+    return "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80";
+  }
+  return url;
+}
+
+export function resolveProfilePhotoUrl(id?: string, url?: string): string {
+  if (!url || url.startsWith("/src/") || url.startsWith("/@fs/") || url.startsWith("http://localhost")) {
+    return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+  }
+  return url;
+}
+
 // Default Initial Seed Competition (Monthly)
 export const CURRENT_COMPETITION: Competition = {
   id: "22222222-2222-4222-a222-000000000001",
@@ -433,18 +474,26 @@ class SpiderService {
     return this.currentUser.superVoteBalance;
   }
 
-  // Get Approved Contestants (Returns fresh clones for React reactivity)
+  // Get Approved Contestants (Returns fresh clones for React reactivity with resolved photo URLs)
   public getApprovedContestants(): Contestant[] {
     return this.contestants
       .filter((c) => c.status === "approved")
-      .map((c) => ({ ...c }))
+      .map((c) => ({
+        ...c,
+        cosplayPhotoUrl: resolveCosplayPhotoUrl(c.id, c.cosplayPhotoUrl),
+        profilePhotoUrl: resolveProfilePhotoUrl(c.id, c.profilePhotoUrl),
+      }))
       .sort((a, b) => b.voteCount - a.voteCount);
   }
 
   // Get All Contestants for Admin Moderation
   public getAllContestants(): Contestant[] {
     return this.contestants
-      .map((c) => ({ ...c }))
+      .map((c) => ({
+        ...c,
+        cosplayPhotoUrl: resolveCosplayPhotoUrl(c.id, c.cosplayPhotoUrl),
+        profilePhotoUrl: resolveProfilePhotoUrl(c.id, c.profilePhotoUrl),
+      }))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -531,8 +580,8 @@ class SpiderService {
           instagramUrl: c.instagram_url,
           country: c.country,
           countryCode: c.country_code || "TR",
-          profilePhotoUrl: c.profile_photo_url,
-          cosplayPhotoUrl: c.cosplay_photo_url,
+          profilePhotoUrl: resolveProfilePhotoUrl(c.id, c.profile_photo_url),
+          cosplayPhotoUrl: resolveCosplayPhotoUrl(c.id, c.cosplay_photo_url),
           category: c.category,
           bio: c.bio,
           status: c.status,

@@ -88,15 +88,30 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "upload.success_desc": "Cosplay başvurunuz sisteme kaydedildi. Onaylandıktan sonra oylamada yer alacaktır.",
 
     // Feed Page
-    "feed.tag": "AYLIK YARIŞMA AKIŞI",
+    "feed.tag": "8. AY YARIŞMA AKIŞI",
     "feed.title": "Spider Queen'ine Oy Ver",
     "feed.search_placeholder": "İsim, kullanıcı adı veya ülkeye göre ara...",
     "feed.all_countries": "🌍 Tüm Ülkeler",
     "feed.sort_votes": "🔥 En Çok Oy Alanlar",
     "feed.sort_newest": "✨ En Yeni Yüklenenler",
-    "feed.vote_btn": "Oy Ver (Günde 1)",
-    "feed.voted_btn": "Oy Kullanıldı (Bugün)",
+    "feed.vote_btn": "Oy Ver",
+    "feed.voted_btn": "Oy Verildi",
     "feed.super_vote_btn": "Süper Oy (+10)",
+    "feed.inspect": "Kostümü İncele",
+    "feed.total_votes": "Toplam Oy",
+
+    // Prizes
+    "prizes.rank1_title": "1. Aylık Birincilik Ödülü",
+    "prizes.rank1_desc": "$1.000 Nakit Para Ödülü + Özel Spider-Queen Tacı + 1 Ay Boyunca Anasayfa Vitrin Özelliği.",
+    "prizes.rank2_title": "2. ve 3. Sıra Ödülleri",
+    "prizes.rank2_desc": "$250 Kostüm Malzemesi Hediye Çeki + Onaylı Rozet + Şöhretler Müzesi Kalıcı Profil Kaydı.",
+    "prizes.rank3_title": "İlk 10 Derece",
+    "prizes.rank3_desc": "Sezon Sonu Büyük Şampiyonasına Doğrudan Katılım Hakkı.",
+
+    // Upload Preview
+    "upload.preview_stage_name": "Sahne Adınız",
+    "upload.preview_username": "kullaniciadi",
+    "upload.preview_bio": "Kostüm açıklamanız burada görünecektir...",
 
     // Landing Page Additions
     "landing.active_tag": "AKTİF YARIŞMACILAR",
@@ -116,10 +131,26 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "theme.title": "Spider-Verse Teması",
 
     // Leaderboard
-    "leaderboard.title": "Küresel Liderlik Tablosu",
+    "leaderboard.tag": "KÜRESEL SPIDER-QUEEN SIRALAMASI",
+    "leaderboard.title": "Liderlik Tablosu & Şöhretler Müzesi",
+    "leaderboard.subtitle": "8. Ay canlı sıralaması. Her standart oy ve Süper Oy kullanımı ile anında güncellenir!",
+    "leaderboard.tab_current": "🔥 8. Ay Canlı Sıralaması",
+    "leaderboard.tab_archive": "👑 Geçmiş Kazananlar Arşivi",
+    "leaderboard.rank_1": "LİDER #1",
+    "leaderboard.rank_2": "2. SIRA",
+    "leaderboard.rank_3": "3. SIRA",
+    "leaderboard.leader_votes": "LİDER OYLARI",
+    "leaderboard.vote_queen": "Kraliçeye Oy Ver",
+    "leaderboard.vote_champion": "Lidere Oy Ver",
+    "leaderboard.full_rankings": "Tüm Yarışmacı Sıralaması",
     "leaderboard.hall_of_fame": "Şöhretler Müzesi",
+    "leaderboard.archive_title": "SpiderQueens Şöhretler Müzesi Arşivi",
     "leaderboard.rank": "Sıra",
     "leaderboard.total_votes": "Toplam Oy",
+    "leaderboard.votes": "Oy",
+    "leaderboard.vote": "Oy Ver",
+    "leaderboard.voted": "Oy Verildi",
+    "leaderboard.winning_votes": "Kazandıran Oy",
 
     // Admin
     "admin.title": "Yönetici Kontrol Paneli",
@@ -203,15 +234,30 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "upload.success_title": "Submission Received!",
     "upload.success_desc": "Your cosplay entry has been logged. Pending approval before appearing on live feed.",
 
-    "feed.tag": "MONTHLY CONTESTANT FEED",
+    "feed.tag": "MONTH #8 COMPETITION FEED",
     "feed.title": "Vote For Your Spider Queen",
     "feed.search_placeholder": "Search by name, handle, or country...",
     "feed.all_countries": "🌍 All Countries",
     "feed.sort_votes": "🔥 Sort by Most Votes",
     "feed.sort_newest": "✨ Sort by Newest Uploads",
-    "feed.vote_btn": "Vote (1/Day)",
-    "feed.voted_btn": "Voted Today",
+    "feed.vote_btn": "Vote",
+    "feed.voted_btn": "Voted",
     "feed.super_vote_btn": "Super Vote (+10)",
+    "feed.inspect": "Inspect Cosplay",
+    "feed.total_votes": "Total Votes",
+
+    // Prizes
+    "prizes.rank1_title": "1st Place Monthly Prize",
+    "prizes.rank1_desc": "$1,000 Cash Prize + Exclusive Spider-Queen Crown + 1 Month Homepage Spotlight Feature.",
+    "prizes.rank2_title": "2nd & 3rd Place Prizes",
+    "prizes.rank2_desc": "$250 Costume Materials Voucher + Verified Badge + Permanent Hall of Fame Profile.",
+    "prizes.rank3_title": "Top 10 Ranks",
+    "prizes.rank3_desc": "Direct Entry Ticket to the End-of-Season Grand Championship.",
+
+    // Upload Preview
+    "upload.preview_stage_name": "Your Stage Name",
+    "upload.preview_username": "username",
+    "upload.preview_bio": "Your costume description will appear here...",
 
     // Landing Page Additions
     "landing.active_tag": "ACTIVE COMPETITION CONTESTANTS",
@@ -230,10 +276,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "payment.crypto": "Crypto (USDT / BTC / ETH / SOL)",
     "theme.title": "Spider-Verse Theme",
 
-    "leaderboard.title": "Global Leaderboard",
+    // Leaderboard
+    "leaderboard.tag": "GLOBAL SPIDER-QUEEN RANKINGS",
+    "leaderboard.title": "Leaderboard & Hall of Fame",
+    "leaderboard.subtitle": "Month #8 live rankings. Real-time updates with every standard vote and Super Vote!",
+    "leaderboard.tab_current": "🔥 Month #8 Live Rankings",
+    "leaderboard.tab_archive": "👑 Past Winners Archive",
+    "leaderboard.rank_1": "LEADER #1",
+    "leaderboard.rank_2": "2ND PLACE",
+    "leaderboard.rank_3": "3RD PLACE",
+    "leaderboard.leader_votes": "LEADER VOTES",
+    "leaderboard.vote_queen": "Vote for Queen",
+    "leaderboard.vote_champion": "Vote for Leader",
+    "leaderboard.full_rankings": "All Contestants Rankings",
     "leaderboard.hall_of_fame": "Hall of Fame Champions",
+    "leaderboard.archive_title": "SpiderQueens Hall of Fame Archive",
     "leaderboard.rank": "Rank",
     "leaderboard.total_votes": "Total Votes",
+    "leaderboard.votes": "Votes",
+    "leaderboard.vote": "Vote",
+    "leaderboard.voted": "Voted",
+    "leaderboard.winning_votes": "Winning Votes",
 
     "admin.title": "Administrator Control Panel",
     "admin.pending": "Pending Approvals",
@@ -321,9 +384,21 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "feed.all_countries": "🌍 Все страны",
     "feed.sort_votes": "🔥 По количеству голосов",
     "feed.sort_newest": "✨ Сначала новые",
-    "feed.vote_btn": "Голосовать",
-    "feed.voted_btn": "Голос отдан",
-    "feed.super_vote_btn": "Супер Голос (+10)",
+    "feed.inspect": "Осмотреть косплей",
+    "feed.total_votes": "Всего голосов",
+
+    // Prizes
+    "prizes.rank1_title": "1-е место ежемесячный приз",
+    "prizes.rank1_desc": "$1 000 наличными + Эксклюзивная корона Spider-Queen + Главная страница на 1 месяц.",
+    "prizes.rank2_title": "Призы за 2-е и 3-е места",
+    "prizes.rank2_desc": "Сертификат $250 на материалы + Подтвержденный значок + Профиль в Зале Славы.",
+    "prizes.rank3_title": "Топ-10 участников",
+    "prizes.rank3_desc": "Прямой билет на Гранд-чемпионат в конце сезона.",
+
+    // Upload Preview
+    "upload.preview_stage_name": "Ваше сценическое имя",
+    "upload.preview_username": "username",
+    "upload.preview_bio": "Описание вашего костюма появится здесь...",
 
     // Landing Page Additions
     "landing.active_tag": "АКТИВНЫЕ УЧАСТНИКИ КОНКУРСА",
@@ -342,10 +417,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "payment.crypto": "Криптовалюта (USDT / BTC / ETH / SOL)",
     "theme.title": "Тема Spider-Verse",
 
-    "leaderboard.title": "Мировой рейтинг",
+    // Leaderboard
+    "leaderboard.tag": "ГЛОБАЛЬНЫЙ РЕЙТИНГ SPIDER-QUEEN",
+    "leaderboard.title": "Таблица лидеров и Зал Славы",
+    "leaderboard.subtitle": "Живой рейтинг за 8-й месяц. Обновляется в реальном времени с каждым голосом!",
+    "leaderboard.tab_current": "🔥 Рейтинг 8-го Месяца",
+    "leaderboard.tab_archive": "👑 Архив прошлых победителей",
+    "leaderboard.rank_1": "ЛИДЕР #1",
+    "leaderboard.rank_2": "2-Е МЕСТО",
+    "leaderboard.rank_3": "3-Е МЕСТО",
+    "leaderboard.leader_votes": "ГОЛОСА ЛИДЕРА",
+    "leaderboard.vote_queen": "Голосовать за Королеву",
+    "leaderboard.vote_champion": "Голосовать за Лидера",
+    "leaderboard.full_rankings": "Полный рейтинг участников",
     "leaderboard.hall_of_fame": "Зал Славы Чемпионов",
+    "leaderboard.archive_title": "Архив Зала Славы SpiderQueens",
     "leaderboard.rank": "Место",
     "leaderboard.total_votes": "Всего голосов",
+    "leaderboard.votes": "Голоса",
+    "leaderboard.vote": "Голосовать",
+    "leaderboard.voted": "Голос отдан",
+    "leaderboard.winning_votes": "Победные голоса",
 
     "admin.title": "Панель администратора",
     "admin.pending": "Ожидают проверки",
@@ -436,6 +528,21 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "feed.vote_btn": "โหวต",
     "feed.voted_btn": "โหวตแล้ว",
     "feed.super_vote_btn": "ซูเปอร์โหวต (+10)",
+    "feed.inspect": "ดูรายละเอียดคอสเพลย์",
+    "feed.total_votes": "คะแนนรวม",
+
+    // Prizes
+    "prizes.rank1_title": "รางวัลชนะเลิศอันดับ 1 ประจำเดือน",
+    "prizes.rank1_desc": "เงินสด $1,000 + มงกุฎสไปเดอร์ควีนสุดพิเศษ + ฟีเจอร์หน้าแรกเป็นเวลา 1 เดือน",
+    "prizes.rank2_title": "รางวัลอันดับ 2 และ 3",
+    "prizes.rank2_desc": "บัตรสมนาคุณวัสดุชุด $250 + ตราสัญลักษณ์ยืนยัน + โปรไฟล์ในหอเกียรติยศถาวร",
+    "prizes.rank3_title": "10 อันดับแรก",
+    "prizes.rank3_desc": "สิทธิ์เข้าร่วมการแข่งขันแกรนด์แชมเปียนชิพท้ายฤดูกาลโดยตรง",
+
+    // Upload Preview
+    "upload.preview_stage_name": "ชื่อในวงการของคุณ",
+    "upload.preview_username": "username",
+    "upload.preview_bio": "คำอธิบายชุดคอสเพลย์ของคุณจะปรากฏที่นี่...",
 
     // Landing Page Additions
     "landing.active_tag": "ผู้เข้าแข่งขันที่กำลังแข่งขัน",
@@ -448,10 +555,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "monetization.sponsored_brands": "แบรนด์คอสเพลย์ผู้สนับสนุนและพันธมิตร",
     "monetization.ad_placeholder": "พื้นที่โฆษณา",
 
-    "leaderboard.title": "ตารางผู้นำระดับโลก",
+    // Leaderboard
+    "leaderboard.tag": "อันดับสไปเดอร์ควีนระดับโลก",
+    "leaderboard.title": "ตารางผู้นำและหอเกียรติยศ",
+    "leaderboard.subtitle": "อันดับสดเดือนที่ 8 อัปเดตทันทีทุกคะแนนโหวตและซูเปอร์โหวต!",
+    "leaderboard.tab_current": "🔥 อันดับสดเดือนที่ 8",
+    "leaderboard.tab_archive": "👑 คลังผู้ชนะในอดีต",
+    "leaderboard.rank_1": "ผู้นำ #1",
+    "leaderboard.rank_2": "อันดับ 2",
+    "leaderboard.rank_3": "อันดับ 3",
+    "leaderboard.leader_votes": "คะแนนผู้นำ",
+    "leaderboard.vote_queen": "โหวตให้ควีน",
+    "leaderboard.vote_champion": "โหวตให้ผู้นำ",
+    "leaderboard.full_rankings": "อันดับผู้เข้าแข่งขันทั้งหมด",
     "leaderboard.hall_of_fame": "หอเกียรติยศแชมเปี้ยน",
+    "leaderboard.archive_title": "คลังหอเกียรติยศ SpiderQueens",
     "leaderboard.rank": "อันดับ",
     "leaderboard.total_votes": "คะแนนรวม",
+    "leaderboard.votes": "โหวต",
+    "leaderboard.vote": "โหวต",
+    "leaderboard.voted": "โหวตแล้ว",
+    "leaderboard.winning_votes": "คะแนนที่ชนะ",
 
     "admin.title": "แผงควบคุมผู้ดูแลระบบ",
     "admin.pending": "รอการอนุมัติ",
@@ -533,7 +657,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "upload.success_title": "提交成功！",
     "upload.success_desc": "您的 Cosplay 作品已录入，审核通过后将出现在投票列表。",
 
-    "feed.tag": "月度参赛列表",
+    "feed.tag": "第 8 个月参赛 FEED",
     "feed.title": "为你心中的蜘蛛女王投票",
     "feed.search_placeholder": "按姓名、用户名或国家搜索...",
     "feed.all_countries": "🌍 所有国家/地区",
@@ -542,6 +666,21 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "feed.vote_btn": "投票",
     "feed.voted_btn": "已投票",
     "feed.super_vote_btn": "超级票 (+10)",
+    "feed.inspect": "查看 Cosplay",
+    "feed.total_votes": "总票数",
+
+    // Prizes
+    "prizes.rank1_title": "月度第 1 名大奖",
+    "prizes.rank1_desc": "$1,000 现金大奖 + 专属蜘蛛女王皇冠 + 首页展示推荐 1 个月",
+    "prizes.rank2_title": "第 2 及第 3 名奖项",
+    "prizes.rank2_desc": "$250 C服道具代金券 + 认证徽章 + 名人堂永久档案",
+    "prizes.rank3_title": "前 10 名选手",
+    "prizes.rank3_desc": "直接晋级赛季末总决赛大奖赛",
+
+    // Upload Preview
+    "upload.preview_stage_name": "您的艺名",
+    "upload.preview_username": "username",
+    "upload.preview_bio": "您的服装介绍将在此处显示...",
 
     // Landing Page Additions
     "landing.active_tag": "当前热门参赛选手",
@@ -554,10 +693,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "monetization.sponsored_brands": "赞助 COSPLAY 品牌与合作伙伴",
     "monetization.ad_placeholder": "广告位",
 
-    "leaderboard.title": "全球排行榜",
+    // Leaderboard
+    "leaderboard.tag": "全球蜘蛛女王排行榜",
+    "leaderboard.title": "排行榜与名人堂",
+    "leaderboard.subtitle": "第 8 个月实时排行榜。随每次普通票与超级票投出即时更新！",
+    "leaderboard.tab_current": "🔥 第 8 个月实时榜单",
+    "leaderboard.tab_archive": "👑 历届冠军档案",
+    "leaderboard.rank_1": "榜首 #1",
+    "leaderboard.rank_2": "第 2 名",
+    "leaderboard.rank_3": "第 3 名",
+    "leaderboard.leader_votes": "领跑票数",
+    "leaderboard.vote_queen": "投给女王",
+    "leaderboard.vote_champion": "投给领跑者",
+    "leaderboard.full_rankings": "全员选手排行榜",
     "leaderboard.hall_of_fame": "名人堂冠军",
+    "leaderboard.archive_title": "SpiderQueens 名人堂档案",
     "leaderboard.rank": "排名",
     "leaderboard.total_votes": "总票数",
+    "leaderboard.votes": "票",
+    "leaderboard.vote": "投票",
+    "leaderboard.voted": "已投票",
+    "leaderboard.winning_votes": "获胜票数",
 
     "admin.title": "管理员控制台",
     "admin.pending": "待审核作品",
@@ -639,7 +795,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "upload.success_title": "応募を受理しました！",
     "upload.success_desc": "エントリーが完了しました。承認後にフィードに公開されます。",
 
-    "feed.tag": "月間コンテストフィード",
+    "feed.tag": "第8ヶ月コンテストフィード",
     "feed.title": "推しのスパイダークイーンに投票",
     "feed.search_placeholder": "名前、ユーザー名、国で検索...",
     "feed.all_countries": "🌍 すべての国",
@@ -648,6 +804,21 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "feed.vote_btn": "投票する",
     "feed.voted_btn": "投票済み",
     "feed.super_vote_btn": "スーパー投票 (+10)",
+    "feed.inspect": "コスプレを見る",
+    "feed.total_votes": "総得票数",
+
+    // Prizes
+    "prizes.rank1_title": "1位 月間優勝賞金",
+    "prizes.rank1_desc": "現金$1,000 + 限定スパイダークイーンクラウン + 1ヶ月間トップページ特集掲載",
+    "prizes.rank2_title": "2位・3位 特典",
+    "prizes.rank2_desc": "$250 衣装素材ギフト券 + 認証バッジ + 殿堂入り永久プロフィール掲載",
+    "prizes.rank3_title": "TOP 10 ランク",
+    "prizes.rank3_desc": "シーズン末グランドチャンピオンシップ直接出場権",
+
+    // Upload Preview
+    "upload.preview_stage_name": "あなたの活動名",
+    "upload.preview_username": "username",
+    "upload.preview_bio": "あなたの衣装説明がここに表示されます...",
 
     // Landing Page Additions
     "landing.active_tag": "アクティブコンテスタント",
@@ -660,10 +831,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     "monetization.sponsored_brands": "スポンサーコスプレブランド＆パートナー",
     "monetization.ad_placeholder": "広告スペース",
 
-    "leaderboard.title": "世界ランキング",
+    // Leaderboard
+    "leaderboard.tag": "世界スパイダークイーンランキング",
+    "leaderboard.title": "ランキング＆殿堂入り",
+    "leaderboard.subtitle": "第8ヶ月ライブランキング。通常の投票やスーパー投票でリアルタイムに更新されます！",
+    "leaderboard.tab_current": "🔥 第8ヶ月ライブランキング",
+    "leaderboard.tab_archive": "👑 歴代 winner アーカイブ",
+    "leaderboard.rank_1": "首位 #1",
+    "leaderboard.rank_2": "第 2 位",
+    "leaderboard.rank_3": "第 3 位",
+    "leaderboard.leader_votes": "首位得票数",
+    "leaderboard.vote_queen": "クイーンに投票",
+    "leaderboard.vote_champion": "首位に投票",
+    "leaderboard.full_rankings": "全コンテスタント順位",
     "leaderboard.hall_of_fame": "殿堂入りチャンピオン",
+    "leaderboard.archive_title": "SpiderQueens 殿堂入りアーカイブ",
     "leaderboard.rank": "順位",
     "leaderboard.total_votes": "総得票数",
+    "leaderboard.votes": "票",
+    "leaderboard.vote": "投票する",
+    "leaderboard.voted": "投票済み",
+    "leaderboard.winning_votes": "勝利票数",
 
     "admin.title": "管理者コントロールパネル",
     "admin.pending": "承認待ちエントリー",

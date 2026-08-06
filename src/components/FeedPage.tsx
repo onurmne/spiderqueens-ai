@@ -334,6 +334,9 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                   alt={inspectedContestant.displayName}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
               </div>
 
