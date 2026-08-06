@@ -199,7 +199,7 @@ export const DEFAULT_USER: UserProfile = {
   createdAt: new Date().toISOString(),
 };
 
-// Local Store Helper keys
+// Local Store Helper keys (fallback storage)
 const STORAGE_KEYS = {
   CONTESTANTS: "sq_contestants_v2",
   VOTES: "sq_votes_v2",
@@ -226,10 +226,10 @@ class SpiderService {
     this.loadInitialData();
   }
 
-  private loadInitialData() {
+  private async loadInitialData() {
+    // Fallback to local storage initialization while integrating Supabase live queries
     if (typeof localStorage === "undefined") return;
 
-    // Load Contestants
     const storedContestants = localStorage.getItem(STORAGE_KEYS.CONTESTANTS);
     if (storedContestants) {
       try {
@@ -242,7 +242,6 @@ class SpiderService {
       this.saveContestants();
     }
 
-    // Load Votes
     const storedVotes = localStorage.getItem(STORAGE_KEYS.VOTES);
     if (storedVotes) {
       try {
@@ -252,7 +251,6 @@ class SpiderService {
       }
     }
 
-    // Load Super Votes
     const storedSuperVotes = localStorage.getItem(STORAGE_KEYS.SUPER_VOTES);
     if (storedSuperVotes) {
       try {
@@ -262,13 +260,44 @@ class SpiderService {
       }
     }
 
-    // Load User
     const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (storedUser) {
       try {
         this.currentUser = JSON.parse(storedUser);
       } catch {
         this.currentUser = DEFAULT_USER;
+      }
+    }
+
+    // Try fetching live data from Supabase if configured
+    if (isSupabaseConfigured()) {
+      try {
+        const { data: remoteContestants } = await supabase.from('contestants').select('*');
+        if (remoteContestants && remoteContestants.length > 0) {
+          // Map snake_case database columns to camelCase Contestant interface if needed
+          this.contestants = remoteContestants.map((c: any) => ({
+            id: c.id,
+            userId: c.profile_id,
+            displayName: c.display_name,
+            username: c.username,
+            instagramUrl: c.instagram_url,
+            country: c.country,
+            countryCode: c.country_code,
+            profilePhotoUrl: c.profile_photo_url,
+            cosplayPhotoUrl: c.cosplay_photo_url,
+            category: c.category,
+            bio: c.bio,
+            status: c.status,
+            rejectionReason: c.rejection_reason,
+            voteCount: c.vote_count,
+            superVoteCount: c.super_vote_count,
+            competitionId: c.competition_id,
+            createdAt: c.created_at,
+            isFeatured: c.is_featured,
+          }));
+        }
+      } catch (err) {
+        console.warn("Supabase fetch fallback to local state:", err);
       }
     }
   }
@@ -326,7 +355,6 @@ class SpiderService {
     return this.currentUser.superVoteBalance;
   }
 
-  // Get Approved Contestants (Returns fresh clones for React reactivity)
   public getApprovedContestants(): Contestant[] {
     return this.contestants
       .filter((c) => c.status === "approved")
@@ -334,34 +362,30 @@ class SpiderService {
       .sort((a, b) => b.voteCount - a.voteCount);
   }
 
-  // Get All Contestants for Admin Moderation
   public getAllContestants(): Contestant[] {
     return this.contestants
       .map((c) => ({ ...c }))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  // Check if User already voted TODAY for this contestant (1 Vote per day constraint)
   public hasUserVotedToday(contestantId: string, userId: string = this.currentUser.id): boolean {
-    const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const todayStr = new Date().toISOString().split("T")[0];
     return this.votes.some(
       (v) => v.userId === userId && v.contestantId === contestantId && v.createdAt.startsWith(todayStr)
     );
   }
 
-  // Alias for backward compatibility
   public hasUserVoted(contestantId: string, userId: string = this.currentUser.id): boolean {
     return this.hasUserVotedToday(contestantId, userId);
   }
 
-  // Cast Standard Vote (Max 1 vote per contestant per day)
   public async castVote(contestantId: string): Promise<{ success: boolean; message: string; newVoteCount: number }> {
     const userId = this.currentUser.id;
 
     if (this.hasUserVotedToday(contestantId, userId)) {
       return {
         success: false,
-        message: "Bugün bu Kraliçe için zaten oy kullandınız! Günde 1 defa ücretsiz oy kullanabilirsiniz. Dilerseniz Süper Oy ile destekleyebilirsiniz.",
+        message: "Bugün bu Kraliçe için zaten oy kullandınız! Günde 1 defa ücretsiz oy kullanabilirsiniz.",
         newVoteCount: this.getContestantById(contestantId)?.voteCount || 0,
       };
     }
@@ -380,21 +404,30 @@ class SpiderService {
     if (contestant) {
       contestant.voteCount += 1;
       this.saveContestants();
+
+      // Sync with Supabase if active
+      if (isSupabaseConfigured()) {
+        await supabase.from('votes').insert([{
+          profile_id: userId,
+          contestant_id: contestantId,
+        }]).catch(() => {});
+        
+        await supabase.from('contestants').update({ vote_count: contestant.voteCount }).eq('id', contestantId).catch(() => {});
+      }
     }
 
     return {
       success: true,
-      message: "🕷️ Oyunuz başarıyla kaydedildi! Bugün bu Kraliçe için 1 oyunuzu kullandınız.",
+      message: "🕷️ Oyunuz başarıyla kaydedildi!",
       newVoteCount: contestant ? contestant.voteCount : 0,
     };
   }
 
-  // Cast Super Vote (10 Votes)
   public async castSuperVote(contestantId: string, amount: number = 10): Promise<{ success: boolean; message: string; newVoteCount: number }> {
     if (this.currentUser.superVoteBalance < amount) {
       return {
         success: false,
-        message: `Insufficient Super Vote tokens! You have ${this.currentUser.superVoteBalance} tokens remaining.`,
+        message: `Yetersiz Süper Oy token'ı! Kalan: ${this.currentUser.superVoteBalance}`,
         newVoteCount: this.getContestantById(contestantId)?.voteCount || 0,
       };
     }
@@ -417,16 +450,28 @@ class SpiderService {
       contestant.voteCount += amount;
       contestant.superVoteCount += 1;
       this.saveContestants();
+
+      if (isSupabaseConfigured()) {
+        await supabase.from('super_votes').insert([{
+          profile_id: this.currentUser.id,
+          contestant_id: contestantId,
+          amount,
+        }]).catch(() => {});
+
+        await supabase.from('contestants').update({ 
+          vote_count: contestant.voteCount,
+          super_vote_count: contestant.superVoteCount 
+        }).eq('id', contestantId).catch(() => {});
+      }
     }
 
     return {
       success: true,
-      message: `⚡ SUPER VOTE UNLEASHED! +${amount} Votes added to ${contestant?.displayName || "Contestant"}!`,
+      message: `⚡ SÜPER OY KULLANILDI! +${amount} Oy eklendi!`,
       newVoteCount: contestant ? contestant.voteCount : 0,
     };
   }
 
-  // Submit New Cosplay Upload
   public async submitContestant(formData: UploadFormData): Promise<{ contestant: Contestant; n8nTriggered: boolean }> {
     const isAutoApprove = this.n8nConfig.autoApprove;
     const newContestant: Contestant = {
@@ -457,37 +502,63 @@ class SpiderService {
       this.setUserRole("contestant");
     }
 
+    // Sync insert to Supabase contestants table
+    if (isSupabaseConfigured()) {
+      await supabase.from('contestants').insert([{
+        profile_id: newContestant.userId,
+        competition_id: newContestant.competitionId,
+        display_name: newContestant.displayName,
+        username: newContestant.username,
+        instagram_url: newContestant.instagramUrl,
+        country: newContestant.country,
+        country_code: newContestant.countryCode,
+        profile_photo_url: newContestant.profilePhotoUrl,
+        cosplay_photo_url: newContestant.cosplayPhotoUrl,
+        category: newContestant.category,
+        bio: newContestant.bio,
+        status: newContestant.status,
+      }]).catch((err) => console.warn("Supabase insert contestant error:", err));
+    }
+
     return { contestant: newContestant, n8nTriggered: true };
   }
 
-  // Admin Approve Submission
-  public approveContestant(id: string): Contestant | undefined {
+  public async approveContestant(id: string): Promise<Contestant | undefined> {
     const contestant = this.contestants.find((c) => c.id === id);
     if (contestant) {
       contestant.status = "approved";
       this.saveContestants();
+
+      if (isSupabaseConfigured()) {
+        await supabase.from('contestants').update({ status: 'approved' }).eq('id', id).catch(() => {});
+      }
     }
     return contestant;
   }
 
-  // Admin Reject Submission
-  public rejectContestant(id: string, reason: string): Contestant | undefined {
+  public async rejectContestant(id: string, reason: string): Promise<Contestant | undefined> {
     const contestant = this.contestants.find((c) => c.id === id);
     if (contestant) {
       contestant.status = "rejected";
       contestant.rejectionReason = reason;
       this.saveContestants();
+
+      if (isSupabaseConfigured()) {
+        await supabase.from('contestants').update({ status: 'rejected', rejection_reason: reason }).eq('id', id).catch(() => {});
+      }
     }
     return contestant;
   }
 
-  // Admin Delete Content
-  public deleteContestant(id: string) {
+  public async deleteContestant(id: string) {
     this.contestants = this.contestants.filter((c) => c.id !== id);
     this.saveContestants();
+
+    if (isSupabaseConfigured()) {
+      await supabase.from('contestants').delete().eq('id', id).catch(() => {});
+    }
   }
 
-  // Admin Crown Winner
   public crownWeeklyWinner(contestantId: string): Winner | undefined {
     const contestant = this.getContestantById(contestantId);
     if (!contestant) return undefined;
