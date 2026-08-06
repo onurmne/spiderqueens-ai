@@ -654,4 +654,4 @@ class SpiderService {
   }
 }
 
-export const spiderService = new SpiderService();
+export const spiderService = new SpiderService(); 
