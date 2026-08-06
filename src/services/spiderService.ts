@@ -269,7 +269,7 @@ class SpiderService {
     }
 
     // Try fetching live data from Supabase if configured
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured) {
       try {
         const { data: remoteContestants, error } = await supabase.from('contestants').select('*');
         if (!error && remoteContestants && remoteContestants.length > 0) {
@@ -377,12 +377,12 @@ class SpiderService {
     return this.hasUserVotedToday(contestantId, userId);
   }
 
-  // Ensure user profile exists in Supabase profiles table before adding votes/super_votes
+  // Ensure user profile exists in Supabase profiles table before adding votes/super_votes using safe limit(1)
   private async ensureSupabaseProfile(userId: string) {
-    if (!isSupabaseConfigured()) return;
+    if (!isSupabaseConfigured) return;
     try {
-      const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
-      if (!data) {
+      const { data } = await supabase.from('profiles').select('id').eq('id', userId).limit(1);
+      if (!data || data.length === 0) {
         await supabase.from('profiles').insert({
           id: userId,
           email: this.currentUser.email,
@@ -425,7 +425,7 @@ class SpiderService {
       this.saveContestants();
 
       // Sync with Supabase if active
-      if (isSupabaseConfigured()) {
+      if (isSupabaseConfigured) {
         try {
           await this.ensureSupabaseProfile(userId);
 
@@ -480,7 +480,7 @@ class SpiderService {
       contestant.superVoteCount += 1;
       this.saveContestants();
 
-      if (isSupabaseConfigured()) {
+      if (isSupabaseConfigured) {
         try {
           await this.ensureSupabaseProfile(this.currentUser.id);
 
@@ -540,7 +540,7 @@ class SpiderService {
     }
 
     // Sync insert to Supabase contestants table
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured) {
       try {
         await this.ensureSupabaseProfile(newContestant.userId);
 
@@ -578,7 +578,7 @@ class SpiderService {
       contestant.status = "approved";
       this.saveContestants();
 
-      if (isSupabaseConfigured()) {
+      if (isSupabaseConfigured) {
         await supabase.from('contestants').update({ status: 'approved' }).eq('id', id).catch(() => {});
       }
     }
@@ -592,7 +592,7 @@ class SpiderService {
       contestant.rejectionReason = reason;
       this.saveContestants();
 
-      if (isSupabaseConfigured()) {
+      if (isSupabaseConfigured) {
         await supabase.from('contestants').update({ status: 'rejected', rejection_reason: reason }).eq('id', id).catch(() => {});
       }
     }
@@ -603,7 +603,7 @@ class SpiderService {
     this.contestants = this.contestants.filter((c) => c.id !== id);
     this.saveContestants();
 
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured) {
       await supabase.from('contestants').delete().eq('id', id).catch(() => {});
     }
   }
