@@ -226,6 +226,13 @@ class SpiderService {
     this.loadInitialData();
   }
 
+  // UUID format validation helper to prevent Supabase 400 Bad Request errors on demo strings
+  private isValidUUID(id: string): boolean {
+    if (!id || typeof id !== "string") return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  }
+
   private async loadInitialData() {
     if (typeof localStorage === "undefined") return;
 
@@ -377,9 +384,9 @@ class SpiderService {
     return this.hasUserVotedToday(contestantId, userId);
   }
 
-  // Ensure user profile exists in Supabase profiles table before adding votes/super_votes using safe limit(1)
+  // Ensure user profile exists in Supabase profiles table before adding votes/super_votes
   private async ensureSupabaseProfile(userId: string) {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured || !this.isValidUUID(userId)) return;
     try {
       const { data } = await supabase.from('profiles').select('id').eq('id', userId).limit(1);
       if (!data || data.length === 0) {
@@ -424,8 +431,8 @@ class SpiderService {
       contestant.voteCount += 1;
       this.saveContestants();
 
-      // Sync with Supabase if active
-      if (isSupabaseConfigured) {
+      // Sync with Supabase if active and valid UUIDs are present
+      if (isSupabaseConfigured && this.isValidUUID(userId) && this.isValidUUID(contestantId)) {
         try {
           await this.ensureSupabaseProfile(userId);
 
@@ -480,7 +487,7 @@ class SpiderService {
       contestant.superVoteCount += 1;
       this.saveContestants();
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && this.isValidUUID(this.currentUser.id) && this.isValidUUID(contestantId)) {
         try {
           await this.ensureSupabaseProfile(this.currentUser.id);
 
@@ -539,8 +546,8 @@ class SpiderService {
       this.setUserRole("contestant");
     }
 
-    // Sync insert to Supabase contestants table
-    if (isSupabaseConfigured) {
+    // Sync insert to Supabase contestants table if valid UUID
+    if (isSupabaseConfigured && this.isValidUUID(newContestant.userId)) {
       try {
         await this.ensureSupabaseProfile(newContestant.userId);
 
@@ -578,7 +585,7 @@ class SpiderService {
       contestant.status = "approved";
       this.saveContestants();
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && this.isValidUUID(id)) {
         await supabase.from('contestants').update({ status: 'approved' }).eq('id', id).catch(() => {});
       }
     }
@@ -592,7 +599,7 @@ class SpiderService {
       contestant.rejectionReason = reason;
       this.saveContestants();
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && this.isValidUUID(id)) {
         await supabase.from('contestants').update({ status: 'rejected', rejection_reason: reason }).eq('id', id).catch(() => {});
       }
     }
@@ -603,7 +610,7 @@ class SpiderService {
     this.contestants = this.contestants.filter((c) => c.id !== id);
     this.saveContestants();
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && this.isValidUUID(id)) {
       await supabase.from('contestants').delete().eq('id', id).catch(() => {});
     }
   }
