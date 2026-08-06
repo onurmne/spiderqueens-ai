@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import { supabase as libSupabase, isSupabaseConfigured as libIsConfigured } from "../lib/supabase";
 
 // Retrieve Supabase config from environment or runtime localStorage settings
 export const getSupabaseCredentials = () => {
@@ -17,10 +16,13 @@ export const getSupabaseCredentials = () => {
 
 const { url, key } = getSupabaseCredentials();
 
-export const isSupabaseConfigured = Boolean((url && key && url.includes("supabase")) || libIsConfigured);
+export const isSupabaseConfigured = Boolean(url && key && (url.includes("supabase") || url.startsWith("http")));
 
-// Use raw untyped/clean client to avoid build minification errors (jn is not a function)
-export const supabase = url && key ? createClient(url, key) : libSupabase;
+// Directly create client to prevent build minification crashes (jn is not a function)
+export const supabase = createClient(
+  url || "https://placeholder-project.supabase.co",
+  key || "placeholder-anon-key"
+);
 
 export const setSupabaseCredentialsInStorage = (newUrl: string, newKey: string) => {
   if (typeof localStorage !== "undefined") {
