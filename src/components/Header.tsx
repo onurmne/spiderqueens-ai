@@ -145,23 +145,14 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            {/* Separate Admin Login / Admin Mode Button */}
-            {currentUser.role === "admin" ? (
+            {/* Admin Mode Button (Only visible when user is admin) */}
+            {currentUser.role === "admin" && (
               <button
                 onClick={() => setActiveTab("admin")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FF003C]/20 border border-[#FF003C] text-[#FF003C] text-xs font-bold cursor-pointer hover:bg-[#FF003C]/30 transition-all"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{t("header.admin_logged", "Yönetici Modu")}</span>
-              </button>
-            ) : (
-              <button
-                onClick={onOpenAdminLoginModal}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#080808] border border-white/10 hover:border-[#FF003C]/50 text-gray-400 hover:text-white text-xs font-medium cursor-pointer transition-all"
-                title="Admin Panel Girişi"
-              >
-                <Lock className="w-3.5 h-3.5 text-gray-400" />
-                <span className="hidden md:inline">{t("header.admin_login", "Yönetici Girişi")}</span>
               </button>
             )}
 
@@ -219,18 +210,6 @@ export const Header: React.FC<HeaderProps> = ({
             );
           })}
 
-          {currentUser.role !== "admin" && (
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAdminLoginModal();
-              }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-white/10"
-            >
-              <Lock className="w-4 h-4 text-[#FF003C]" />
-              <span>{t("header.admin_login", "Yönetici Girişi")}</span>
-            </button>
-          )}
         </div>
       )}
     </header>

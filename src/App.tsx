@@ -45,6 +45,16 @@ function MainApp() {
 
   useEffect(() => {
     refreshState();
+
+    // Check if URL contains admin parameter or route
+    if (
+      typeof window !== "undefined" &&
+      (window.location.search.toLowerCase().includes("admin") ||
+        window.location.hash.toLowerCase().includes("admin") ||
+        window.location.pathname.toLowerCase().includes("admin"))
+    ) {
+      setIsAdminLoginModalOpen(true);
+    }
   }, []);
 
   const handleAdminLoginSuccess = () => {
@@ -194,6 +204,21 @@ function MainApp() {
         onCastSuperVote={handleCastSuperVote}
         preselectedContestantId={preselectedSuperVoteContestantId}
       />
+
+      {/* Footer with subtle admin trigger */}
+      <footer className="py-8 text-center text-xs text-gray-600 border-t border-white/5 space-y-2 mb-16 lg:mb-0">
+        <p>© 2026 SpiderQueens Global Cosplay Championship. All rights reserved.</p>
+        <div className="flex items-center justify-center gap-4 text-[11px] text-gray-500">
+          <span>Spider-Verse Fan Portal</span>
+          <span>•</span>
+          <button
+            onClick={() => setIsAdminLoginModalOpen(true)}
+            className="hover:text-gray-400 underline decoration-gray-700 cursor-pointer"
+          >
+            Yönetici Girişi
+          </button>
+        </div>
+      </footer>
 
       {/* Mobile Bottom Navigation Bar */}
       <MobileNav

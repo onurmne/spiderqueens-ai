@@ -40,7 +40,7 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
 
 /**
  * On application startup, checks whether the Supabase client initializes correctly
- * and verifies connection by querying all core database tables.
+ * and can reach the Supabase backend.
  */
 export async function testSupabaseConnection(): Promise<boolean> {
   if (!isSupabaseConfigured) {
@@ -51,32 +51,28 @@ export async function testSupabaseConnection(): Promise<boolean> {
     return false;
   }
 
-  console.log("🔍 Supabase bağlantı ve tablo testi başlatılıyor...");
-  const tables = ['profiles', 'competitions', 'contestants', 'votes', 'super_votes', 'winners'];
-  let hasError = false;
+  try {
+    // Test API connectivity to Supabase
+    const { error } = await supabase.from("_connection_test").select("*").limit(0);
 
-  for (const table of tables) {
-    try {
-      const { data, error } = await supabase.from(table).select('*').limit(1);
-      
-      if (error) {
-        console.error(`❌ [${table}] tablosu hatası:`, error.message);
-        hasError = true;
-      } else {
-        console.log(`✅ [${table}] tablosu başarılı! Kayıtlı veri var.`);
-      }
-    } catch (err: any) {
-      console.error(`❌ [${table}] bağlantı istisnası:`, err?.message || String(err));
-      hasError = true;
+    // If fetch failed due to invalid domain or network offline
+    if (
+      error &&
+      (error.message?.includes("fetch") ||
+        error.message?.includes("NetworkError") ||
+        error.message?.includes("Failed to parse URL"))
+    ) {
+      console.error("❌ Supabase Connection Failed");
+      console.error("Error Details:", error.message || error);
+      return false;
     }
-  }
 
-  if (hasError) {
-    console.warn("⚠️ Bazı tablolara erişimde sorun yaşandı. RLS politikalarını veya tablo adlarını kontrol edin.");
-    return false;
-  } else {
-    console.log("🎉 Tüm Supabase tablo bağlantıları kusursuz çalışıyor!");
+    console.log("✅ Supabase Connected");
     return true;
+  } catch (err: any) {
+    console.error("❌ Supabase Connection Failed");
+    console.error("Error Details:", err?.message || String(err));
+    return false;
   }
 }
 

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Zap, X, Check, ShieldCheck, Sparkles, CreditCard, Coins, Copy, ArrowLeft, Loader2, Lock } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Zap, X, Check, ShieldCheck, Sparkles, CreditCard, Coins, Copy, ArrowLeft, Loader2, Lock, ShoppingBag } from "lucide-react";
 import { Contestant } from "../types";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -26,13 +26,26 @@ export const SuperVoteModal: React.FC<SuperVoteModalProps> = ({
   const [selectedContestantId, setSelectedContestantId] = useState<string>(
     preselectedContestantId || (contestants[0]?.id ?? "")
   );
-  const [activeTab, setActiveTab] = useState<"store" | "boost">("store");
+  const [activeTab, setActiveTab] = useState<"store" | "boost">("boost");
   const [selectedPack, setSelectedPack] = useState<{
     id: string;
     tokens: number;
     votes: number;
     price: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (preselectedContestantId) {
+        setSelectedContestantId(preselectedContestantId);
+        setActiveTab("boost");
+      } else if (currentBalance >= 1) {
+        setActiveTab("boost");
+      } else {
+        setActiveTab("boost");
+      }
+    }
+  }, [isOpen, preselectedContestantId, currentBalance]);
 
   const [paymentMethod, setPaymentMethod] = useState<"card" | "crypto">("card");
   const [cardNumber, setCardNumber] = useState("");
@@ -389,18 +402,28 @@ export const SuperVoteModal: React.FC<SuperVoteModalProps> = ({
               </select>
             </div>
 
-            <button
-              onClick={handleBoost}
-              disabled={currentBalance < 1}
-              className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                currentBalance < 1
-                  ? "bg-[#080808] text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-amber-500 to-yellow-400 text-[#050505] shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-105"
-              }`}
-            >
-              <Zap className="w-4 h-4 fill-[#050505]" />
-              <span>+10 Süper Oy Desteği Gönder</span>
-            </button>
+            {currentBalance < 1 ? (
+              <div className="space-y-3 p-4 rounded-2xl bg-[#050505] border border-amber-500/30 text-center">
+                <p className="text-xs text-amber-200">
+                  Süper Oy kullanabilmek için jetonunuz bulunmuyor. 1 Süper Oy jetonu yarışmacınıza anında <strong className="text-amber-400">+10 oy</strong> kazandırır.
+                </p>
+                <button
+                  onClick={() => setActiveTab("store")}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-[#050505] font-black text-xs uppercase tracking-wider hover:scale-105 transition-transform cursor-pointer shadow-md flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag className="w-4 h-4 text-[#050505]" />
+                  <span>Jeton Mağazasına Git & Jeton Al</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleBoost}
+                className="w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-amber-500 to-yellow-400 text-[#050505] shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-105"
+              >
+                <Zap className="w-4 h-4 fill-[#050505]" />
+                <span>+10 Süper Oy Desteği Gönder (1 Jeton Harca)</span>
+              </button>
+            )}
           </div>
         )}
       </div>
