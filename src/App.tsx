@@ -15,6 +15,7 @@ import { ProfilePage } from "./components/ProfilePage";
 import { MonetizationBanners } from "./components/MonetizationBanners";
 import { PwaPrompt } from "./components/PwaPrompt";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import { testSupabaseConnection } from "./lib/supabase";
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState<string>("landing");
@@ -45,6 +46,7 @@ function MainApp() {
 
   useEffect(() => {
     refreshState();
+    testSupabaseConnection();
 
     // Check if URL contains admin parameter or route
     if (
@@ -78,9 +80,18 @@ function MainApp() {
     refreshState();
   };
 
-  const handleSuperVoteTrigger = (contestantId: string) => {
-    setPreselectedSuperVoteContestantId(contestantId);
-    setIsSuperVoteModalOpen(true);
+  const handleSuperVoteTrigger = async (contestantId: string) => {
+    const user = spiderService.getCurrentUser();
+    if (user.superVoteBalance >= 1) {
+      // User has super vote tokens -> Directly cast the super vote (+10)
+      const res = await spiderService.castSuperVote(contestantId, 10);
+      alert(res.message);
+      refreshState();
+    } else {
+      // User has no tokens -> Open the token purchase store modal
+      setPreselectedSuperVoteContestantId(contestantId);
+      setIsSuperVoteModalOpen(true);
+    }
   };
 
   const handleBuyTokens = (amount: number) => {

@@ -43,35 +43,31 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
  * and can reach the Supabase backend.
  */
 export async function testSupabaseConnection(): Promise<boolean> {
+  console.log("🔍 [Supabase] Bağlantı kontrolü yapılıyor...");
+
   if (!isSupabaseConfigured) {
-    console.error("❌ Supabase Connection Failed");
-    console.error(
-      "Error Details: Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY environment variables."
-    );
+    console.warn("⚠️ [Supabase] VITE_SUPABASE_URL veya VITE_SUPABASE_ANON_KEY çevre değişkenleri tanımsız. Uygulama yerel modda (LocalStorage) çalışıyor.");
     return false;
   }
 
   try {
-    // Test API connectivity to Supabase
-    const { error } = await supabase.from("_connection_test").select("*").limit(0);
+    const { error } = await supabase.from("contestants").select("id").limit(1);
 
-    // If fetch failed due to invalid domain or network offline
     if (
       error &&
       (error.message?.includes("fetch") ||
         error.message?.includes("NetworkError") ||
         error.message?.includes("Failed to parse URL"))
     ) {
-      console.error("❌ Supabase Connection Failed");
-      console.error("Error Details:", error.message || error);
+      console.error("❌ Supabase Connection Failed - Sunucuya Erişilemedi:");
+      console.error("Hata Detayı:", error.message || error);
       return false;
     }
 
-    console.log("✅ Supabase Connected");
+    console.log("✅ Supabase Connected - Supabase Veritabanı Bağlantısı Başarılı!");
     return true;
   } catch (err: any) {
-    console.error("❌ Supabase Connection Failed");
-    console.error("Error Details:", err?.message || String(err));
+    console.error("❌ Supabase Connection Failed - Bağlantı Hatası:", err?.message || String(err));
     return false;
   }
 }

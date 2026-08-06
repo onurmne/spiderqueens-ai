@@ -38,9 +38,9 @@ export const SuperVoteModal: React.FC<SuperVoteModalProps> = ({
     if (isOpen) {
       if (preselectedContestantId) {
         setSelectedContestantId(preselectedContestantId);
-        setActiveTab("boost");
-      } else if (currentBalance >= 1) {
-        setActiveTab("boost");
+      }
+      if (currentBalance < 1) {
+        setActiveTab("store");
       } else {
         setActiveTab("boost");
       }

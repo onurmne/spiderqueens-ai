@@ -203,7 +203,7 @@ const STORAGE_KEYS = {
   CONTESTANTS: "sq_contestants_v2",
   VOTES: "sq_votes_v2",
   SUPER_VOTES: "sq_super_votes_v2",
-  USER: "sq_current_user_v2",
+  USER: "sq_current_user_v3",
   N8N: "sq_n8n_config_v2",
   WINNERS: "sq_winners_v2",
 };
@@ -261,14 +261,38 @@ class SpiderService {
       }
     }
 
+    // Clean legacy stored user keys if any exist
+    try {
+      localStorage.removeItem("sq_current_user_v1");
+      localStorage.removeItem("sq_current_user_v2");
+      localStorage.removeItem("sq_current_user");
+    } catch {
+      // Ignore storage cleanup errors
+    }
+
     // Load User
     const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (storedUser) {
       try {
-        this.currentUser = JSON.parse(storedUser);
+        const parsed = JSON.parse(storedUser);
+        if (
+          !parsed ||
+          parsed.id === "user-demo-1" ||
+          parsed.username === "spider_fanatic" ||
+          parsed.displayName === "Spider Fanatic"
+        ) {
+          this.currentUser = { ...DEFAULT_USER };
+          this.saveUser();
+        } else {
+          this.currentUser = parsed;
+        }
       } catch {
-        this.currentUser = DEFAULT_USER;
+        this.currentUser = { ...DEFAULT_USER };
+        this.saveUser();
       }
+    } else {
+      this.currentUser = { ...DEFAULT_USER };
+      this.saveUser();
     }
   }
 
